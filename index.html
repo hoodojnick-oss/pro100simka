@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ПРО100СИМка — Непубличные тарифы T2</title>
+<meta name="description" content="Официальный партнёр T2. Тарифы от 300₽/мес. Доставка Почтой, Озон, Пятёрочка. pro100simka.ru"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0d0d;
+  --bg2:#131313;
+  --bg3:#1a1a1a;
+  --bg4:#222;
+  --mag:#ff3495;
+  --mag2:#e02080;
+  --mag-glow:rgba(255,52,149,.35);
+  --white:#fff;
+  --gray:#aaa;
+  --gray2:#666;
+  --gray3:#333;
+  --border:#2a2a2a;
+  --r:10px;
+  --r2:14px;
+  --fh:'Unbounded',sans-serif;
+  --fb:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.55}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none}
+input,select{font-family:var(--fb)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.wrap-sm{max-width:880px;margin:0 auto;padding:0 20px}
+
+/* ── BUTTONS ── */
+.btn-mag{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--mag);color:#fff;border:none;border-radius:var(--r);
+  font-family:var(--fb);font-weight:700;font-size:.95rem;
+  padding:14px 32px;cursor:pointer;transition:background .2s,transform .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.btn-mag:hover{background:var(--mag2);transform:translateY(-2px);box-shadow:0 8px 28px var(--mag-glow)}
+.btn-outline{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;color:#fff;border:1px solid var(--border);border-radius:var(--r);
+  font-weight:600;font-size:.9rem;padding:12px 28px;cursor:pointer;transition:.2s;
+}
+.btn-outline:hover{border-color:var(--mag);color:var(--mag)}
+.btn-full{width:100%}
+.btn-lg{padding:17px 40px;font-size:1.05rem;border-radius:12px}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
+.rv.in{opacity:1;transform:none}
+.rv1{transition-delay:.07s}.rv2{transition-delay:.14s}.rv3{transition-delay:.21s}
+
+/* ══════════════ NAV ══════════════ */
+.nav{
+  position:sticky;top:0;z-index:300;
+  background:rgba(13,13,13,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+}
+.nav-in{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;max-width:1160px;margin:0 auto;gap:12px}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.logo-t2{
+  background:var(--white);color:var(--bg);font-family:var(--fh);font-weight:900;
+  font-size:.85rem;width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;letter-spacing:-.03em;flex-shrink:0;
+}
+.logo-name{font-family:var(--fh);font-weight:800;font-size:1rem;letter-spacing:-.03em;line-height:1}
+.logo-name .m{color:var(--mag)}
+.logo-sub{font-size:.6rem;color:var(--gray2);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{font-size:.82rem;color:var(--gray);transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.blogger-pill{
+  display:none;align-items:center;gap:6px;
+  background:rgba(255,52,149,.12);border:1px solid rgba(255,52,149,.3);
+  border-radius:100px;padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--mag);
+}
+.blogger-pill.on{display:flex}
+.bdot{width:6px;height:6px;border-radius:50%;background:var(--mag);animation:blink 1.6s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ══════════════ HERO ══════════════ */
+.hero{
+  background:linear-gradient(135deg,#0d0d0d 0%,#1a0a14 50%,#0d0d0d 100%);
+  padding:70px 0 60px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 80% at 70% 30%,rgba(255,52,149,.12) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 60% at 10% 80%,rgba(40,80,255,.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+/* neon grid */
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,52,149,.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,52,149,.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;
+}
+.hero-inner{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+}
+.hero-left{display:flex;flex-direction:column;gap:20px}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mag);background:rgba(255,52,149,.08);border:1px solid rgba(255,52,149,.2);border-radius:100px;padding:5px 14px;margin-bottom:4px;width:fit-content}
+.hero-kicker::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mag);flex-shrink:0;animation:blink 1.6s infinite}
+.hero-h1{font-family:var(--fh);font-weight:900;font-size:clamp(2.2rem,5vw,3.6rem);line-height:.98;letter-spacing:-.04em;text-transform:uppercase}
+.hero-h1 .m{color:var(--mag);display:block}
+.hero-sub{color:var(--gray);font-size:1rem;line-height:1.7;max-width:460px;border-left:2px solid rgba(255,52,149,.3);padding-left:14px}
+.hero-badges{display:flex;gap:16px;flex-wrap:wrap}
+.hbadge{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:12px 16px;flex:1;min-width:120px;
+  transition:border-color .2s,background .2s;
+}
+.hbadge:hover{border-color:rgba(255,52,149,.3);background:rgba(255,52,149,.05)}
+.hbadge-ico{font-size:1.2rem;flex-shrink:0}
+.hbadge-t{font-size:.75rem;font-weight:600;line-height:1.3}
+.hero-right{position:relative;display:flex;justify-content:center;align-items:center}
+/* Имитация фото-блока */
+.hero-img-mock{
+  width:100%;max-width:460px;aspect-ratio:4/5;
+  background:linear-gradient(145deg,#1e0d1a,#2a1020,#0d1a2e);
+  border-radius:20px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,52,149,.2);
+}
+.hero-img-mock::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 60% at 50% 30%,rgba(255,52,149,.25),transparent 70%),
+             radial-gradient(ellipse 40% 40% at 80% 70%,rgba(40,80,255,.2),transparent 60%);
+}
+.hero-img-text{
+  font-family:var(--fh);font-weight:900;font-size:5rem;letter-spacing:-.05em;
+  color:rgba(255,255,255,.08);text-align:center;line-height:1;position:relative;z-index:1;
+}
+/* Floating card */
+.hero-float{
+  position:absolute;bottom:24px;right:-16px;
+  background:rgba(20,20,20,.95);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,52,149,.3);border-radius:var(--r2);
+  padding:14px 18px;min-width:170px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.hf-logo{font-family:var(--fh);font-weight:900;font-size:.85rem;margin-bottom:4px}
+.hf-logo .m{color:var(--mag)}
+.hf-sub{font-size:.68rem;color:var(--gray2)}
+/* Neon icons around */
+.neon-ico{
+  position:absolute;font-size:3rem;filter:drop-shadow(0 0 12px var(--mag));
+  animation:float 3s ease-in-out infinite;
+}
+.neon-ico:nth-child(2){top:12%;right:5%;animation-delay:.5s}
+.neon-ico:nth-child(3){top:35%;right:-2%;animation-delay:1s}
+.neon-ico:nth-child(4){bottom:20%;left:5%;animation-delay:1.5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.return-note{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,52,149,.07);border:1px solid rgba(255,52,149,.18);
+  border-radius:100px;padding:11px 20px;font-size:.82rem;color:var(--mag);font-weight:600;
+  width:fit-content;
+}
+
+/* ══════════════ PLANS ══════════════ */
+.plans-sec{padding:70px 0}
+.sec-title{font-family:var(--fh);font-weight:900;font-size:clamp(1.4rem,3vw,2rem);text-align:center;text-transform:uppercase;letter-spacing:-.03em;margin-bottom:8px}
+.sec-sub{text-align:center;color:var(--gray);font-size:.88rem;margin-bottom:40px}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.plan{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:28px 24px;display:flex;flex-direction:column;gap:0;position:relative;
+  transition:border-color .2s,transform .2s;cursor:pointer;
+}
+.plan:hover{border-color:var(--mag);transform:translateY(-4px)}
+.plan.hot{border-color:var(--mag)}
+.hit-badge{
+  position:absolute;top:-1px;right:20px;
+  background:var(--mag);color:#fff;font-family:var(--fh);font-weight:800;
+  font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 12px;border-radius:0 0 8px 8px;
+}
+.plan-head{margin-bottom:16px}
+.plan-title{font-family:var(--fh);font-weight:900;font-size:1.25rem;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:10px}
+.plan-title .m{color:var(--mag)}
+.plan-price-tag{
+  display:inline-flex;align-items:baseline;gap:4px;
+  background:var(--mag);color:#fff;border-radius:8px;
+  padding:6px 14px;font-weight:800;font-size:1rem;
+}
+.plan-price-tag small{font-size:.72rem;font-weight:500;opacity:.85}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin:18px 0 22px;flex:1}
+.plan-feats li{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;line-height:1.4;color:rgba(255,255,255,.85)}
+.fi{
+  width:20px;height:20px;flex-shrink:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;margin-top:1px;
+}
+.fi-m{background:rgba(255,52,149,.15);color:var(--mag);border:1px solid rgba(255,52,149,.3)}
+.fi-ico{width:20px;height:20px;flex-shrink:0;font-size:.95rem;margin-top:1px}
+.cashback-note{
+  text-align:center;margin-top:24px;font-size:.78rem;color:var(--gray);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.cashback-note span{color:var(--mag);font-weight:600;text-decoration:underline;cursor:pointer}
+
+/* ══════════════ HOW IT WORKS ══════════════ */
+.how-sec{padding:60px 0;background:var(--bg2)}
+.how-steps{
+  display:flex;align-items:flex-start;gap:0;margin-top:40px;
+  overflow-x:auto;padding-bottom:8px;
+}
+.how-step{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  flex:1;min-width:90px;position:relative;
+}
+.how-step:not(:last-child)::after{
+  content:'»';position:absolute;top:20px;right:-10px;
+  font-size:1.1rem;color:var(--mag);font-weight:700;z-index:1;
+}
+.how-ico{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,52,149,.1);border:1px solid rgba(255,52,149,.3);
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  margin-bottom:10px;flex-shrink:0;
+}
+.how-n{font-family:var(--fh);font-weight:800;font-size:.72rem;color:var(--mag);margin-bottom:4px}
+.how-lbl{font-size:.72rem;color:var(--gray);line-height:1.4;padding:0 4px}
+
+/* ══════════════ ORDER FUNNEL ══════════════ */
+.order-sec{padding:70px 0}
+.progress-bar{
+  display:flex;align-items:center;margin-bottom:32px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px 16px;gap:0;overflow-x:hidden;
+}
+.pb-step{
+  display:flex;align-items:center;gap:10px;flex:1;min-width:100px;
+  transition:opacity .3s;
+}
+.pb-step:not(.active){opacity:.35}
+.pb-step.done .pb-num{background:var(--mag);border-color:var(--mag);color:#fff}
+.pb-step.active .pb-num{background:var(--mag);border-color:var(--mag);color:#fff;box-shadow:0 0 16px var(--mag-glow)}
+.pb-num{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--border);
+  background:var(--bg3);color:var(--gray);font-weight:700;font-size:.78rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.3s;
+}
+.pb-lbl{font-size:.75rem;font-weight:600;white-space:nowrap}
+.pb-line{flex:1;height:1px;background:var(--border);margin:0 8px;min-width:20px}
+.pb-line.done{background:var(--mag)}
+
+/* Steps container */
+.funnel-steps{display:none}
+.funnel-steps.active{display:block}
+
+/* Step layout */
+.step-grid{display:grid;gap:16px}
+.step-grid-2{grid-template-columns:1fr 1fr}
+.step-grid-3{grid-template-columns:1fr 1fr 1fr}
+.step-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:24px 20px}
+.step-lbl{font-family:var(--fh);font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mag);margin-bottom:14px}
+
+/* Plan select inside funnel */
+.sel-plan{
+  background:var(--bg3);border:2px solid transparent;border-radius:var(--r);
+  padding:16px;cursor:pointer;margin-bottom:8px;transition:border-color .2s;
+  display:flex;align-items:flex-start;gap:12px;
+  -webkit-tap-highlight-color:transparent;
+}
+.sel-plan.on{border-color:var(--mag)}
+.sel-plan-radio{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--gray2);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.sel-plan.on .sel-plan-radio{border-color:var(--mag);background:var(--mag)}
+.sel-plan.on .sel-plan-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+.sel-plan-name{font-family:var(--fh);font-weight:800;font-size:.9rem;text-transform:uppercase;flex:1;line-height:1.3}
+.sel-plan-price{
+  background:var(--mag);color:#fff;border-radius:6px;
+  padding:4px 12px;font-size:.8rem;font-weight:700;flex-shrink:0;white-space:nowrap;
+}
+.sel-plan-feats{font-size:.75rem;color:var(--gray);margin-top:4px;padding-left:30px;line-height:1.5}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Form inputs */
+.form-in{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 14px;color:#fff;font-size:.9rem;outline:none;transition:border-color .2s;
+  margin-bottom:10px;
+}
+.form-in::placeholder{color:var(--gray2)}
+.form-in:focus{border-color:var(--mag)}
+.form-in.err{border-color:#ff4444}
+.form-lbl{font-size:.75rem;font-weight:600;color:var(--gray);margin-bottom:6px;display:block}
+.in-wrap{margin-bottom:12px}
+.emsg{display:none;font-size:.72rem;color:#ff6b6b;margin-top:-6px;margin-bottom:6px}
+.emsg.on{display:block}
+
+/* Delivery */
+.deliv-opts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.deliv-opt{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg3);border:2px solid transparent;border-radius:var(--r);
+  padding:12px 14px;cursor:pointer;transition:border-color .2s;
+}
+.deliv-opt.on{border-color:var(--mag)}
+.deliv-opt-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray2);flex-shrink:0;position:relative}
+.deliv-opt.on .deliv-opt-radio{border-color:var(--mag);background:var(--mag)}
+.deliv-opt.on .deliv-opt-radio::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;top:50%;left:50%;transform:translate(-50%,-50%)}
+.deliv-logo{font-size:1.1rem;flex-shrink:0}
+.deliv-name{font-weight:700;font-size:.88rem}
+.deliv-sub{font-size:.72rem;color:var(--gray);margin-top:1px}
+.deliv-logo-img{
+  background:#fff;border-radius:4px;padding:2px 6px;
+  font-weight:800;font-size:.6rem;color:#005bff;flex-shrink:0;white-space:nowrap;
+}
+.ozon-logo{color:#005bff}
+.p5-logo{background:#ffe000;color:#e31e24;font-weight:900}
+
+/* Navigation buttons */
+.step-nav{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap}
+.step-back{font-size:.85rem;color:var(--gray);font-weight:600;cursor:pointer;transition:color .2s}
+.step-back:hover{color:#fff}
+
+/* Summary bar */
+.summary-bar{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.sum-item{display:flex;flex-direction:column;gap:2px}
+.sum-lbl{font-size:.68rem;color:var(--gray2);text-transform:uppercase;letter-spacing:.08em}
+.sum-val{font-weight:700;font-size:.88rem}
+.sum-val.m{color:var(--mag)}
+.sum-divider{width:1px;height:32px;background:var(--border)}
+
+/* ══════════════ PAYMENT ══════════════ */
+.payment-box{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:32px 28px;max-width:600px;margin:0 auto;
+}
+.payment-title{font-family:var(--fh);font-weight:900;font-size:1.2rem;text-align:center;margin-bottom:6px}
+.payment-sub{text-align:center;color:var(--gray);font-size:.85rem;margin-bottom:24px}
+.payment-amount{text-align:center;margin-bottom:24px}
+.pa-label{font-size:.8rem;color:var(--gray);margin-bottom:4px}
+.pa-sum{font-family:var(--fh);font-weight:900;font-size:3rem;color:var(--mag)}
+.pa-return{font-size:.78rem;color:var(--gray);margin-top:4px}
+.pa-return b{color:var(--mag)}
+.payment-methods{margin-bottom:24px}
+.pm-label{font-size:.75rem;color:var(--gray);font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.pm-logos{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.pm-logo{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:8px 14px;font-weight:800;font-size:.85rem;
+}
+.pm-mir{color:#007a60}
+.pm-visa{color:#1a1f71}
+.pm-mc{font-size:1.2rem}
+.pm-sbp{color:#fff;font-size:.75rem}
+.pm-card-input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 16px;color:#fff;font-size:1rem;outline:none;margin-bottom:10px;
+  transition:border-color .2s;letter-spacing:.08em;font-family:var(--fb);
+}
+.pm-card-input:focus{border-color:var(--mag)}
+.pm-card-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cashback-guarantee{
+  background:rgba(255,52,149,.08);border:1px solid rgba(255,52,149,.25);
+  border-radius:var(--r);padding:14px 16px;margin-bottom:20px;
+}
+.cg-title{font-size:.82rem;font-weight:700;color:var(--mag);margin-bottom:4px}
+.cg-desc{font-size:.78rem;color:var(--gray);line-height:1.5}
+.secure-note{text-align:center;font-size:.72rem;color:var(--gray2);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ══════════════ WHY T2 ══════════════ */
+.why-sec{padding:60px 0;background:var(--bg2)}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:36px}
+.why-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:24px 20px;text-align:center}
+.why-ico{font-size:2rem;margin-bottom:12px}
+.why-t{font-family:var(--fh);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:6px}
+.why-d{font-size:.78rem;color:var(--gray);line-height:1.55}
+
+/* ══════════════ SUCCESS ══════════════ */
+.success-screen{
+  display:none;text-align:center;
+  padding:60px 20px;max-width:520px;margin:0 auto;
+}
+.success-screen.on{display:block}
+.ss-ico{font-size:5rem;display:block;margin-bottom:24px;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.ss-h{font-family:var(--fh);font-weight:900;font-size:1.8rem;text-transform:uppercase;margin-bottom:12px}
+.ss-sub{color:var(--gray);font-size:.9rem;margin-bottom:20px;line-height:1.6}
+.ss-return{
+  background:rgba(255,52,149,.1);border:1px solid rgba(255,52,149,.25);
+  border-radius:var(--r2);padding:16px 20px;margin-bottom:16px;
+}
+.ss-return-t{font-weight:700;color:var(--mag);margin-bottom:4px;font-size:.9rem}
+.ss-return-d{font-size:.8rem;color:var(--gray);line-height:1.5}
+.ss-blogger{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 20px;font-size:.82rem;color:var(--gray);margin-top:12px;
+}
+
+/* ══════════════ FOOTER ══════════════ */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:28px 0}
+.foot-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.foot-logo{display:flex;align-items:center;gap:10px}
+.fl-t2{background:#fff;color:#000;font-family:var(--fh);font-weight:900;font-size:.75rem;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.fl-name{font-family:var(--fh);font-weight:800;font-size:.9rem;letter-spacing:-.02em}
+.fl-name .m{color:var(--mag)}
+.foot-nav{display:flex;gap:20px;flex-wrap:wrap}
+.foot-nav a{font-size:.78rem;color:var(--gray);transition:color .2s}
+.foot-nav a:hover{color:#fff}
+.foot-copy{font-size:.72rem;color:var(--gray2)}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .plans-grid{grid-template-columns:1fr}
+  .step-grid-2,.step-grid-3{grid-template-columns:1fr}
+  .how-steps{gap:2px}
+  .how-step:not(:last-child)::after{right:-6px;font-size:.9rem}
+  .why-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .summary-bar{flex-direction:column;align-items:flex-start}
+  .sum-divider{display:none}
+}
+@media(max-width:540px){
+  .why-grid{grid-template-columns:1fr}
+  .progress-bar{padding:12px 14px;gap:0}
+  .pb-lbl{font-size:.65rem}
+  .pm-card-row{grid-template-columns:1fr}
+  .hero-badges{flex-direction:column}
+}
+
+@media(max-width:480px){
+  .sel-plan{padding:14px 12px}
+  .sel-plan-name{font-size:.82rem}
+  .sel-plan-feats{font-size:.72rem}
+  .sel-plan-price{font-size:.75rem;padding:3px 10px}
+  .step-box{padding:18px 14px}
+  .step-lbl{font-size:.7rem}
+  .pb-lbl{font-size:.62rem;letter-spacing:0}
+  .pb-num{width:24px;height:24px;font-size:.7rem}
+  .step-nav .btn-mag{width:100%}
+  .step-back{display:block;text-align:center;width:100%;margin-top:6px}
+  .order-sec{padding:40px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ NAV ════════════════ -->
+<nav class="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo" style="text-decoration:none">
+      <svg width="178" height="44" viewBox="0 0 178 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="42" height="42" rx="10" fill="#0d0d0d" stroke="#ff3495" stroke-width="1.5"/>
+        <text x="22" y="29" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="20" fill="#ff3495" letter-spacing="-1">t2</text>
+        <text x="54" y="17" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="10" fill="#ff3495" letter-spacing="1.5">ПРО100</text>
+        <rect x="54" y="21" width="122" height="1" fill="#1e1e1e"/>
+        <text x="54" y="35" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="17" fill="#ffffff" letter-spacing="1.5">СИМка</text>
+        <text x="54" y="43" font-family="Arial,sans-serif" font-size="8" font-weight="500" fill="#2a2a2a" letter-spacing="1.2">PRO100SIMKA.RU</text>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="#plans">Тарифы</a>
+      <a href="#how">Как работает</a>
+      <a href="#order">Заказать</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="blogger-pill" id="bPill">
+        <span class="bdot"></span>
+        <span id="bPillTxt"></span>
+      </div>
+      <a href="#order" class="btn-mag" style="padding:10px 20px;font-size:.82rem">Заказать сим</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-left rv">
+        <div class="hero-kicker">Официальный партнёр T2 · pro100simka.ru</div>
+        <h1 class="hero-h1">
+          Выгодная<br/>связь T2 —<br/>
+          <span class="m">Непубличные<br/>тарифы</span>
+        </h1>
+        <p class="hero-sub">Тарифы, которых нет в открытом доступе. Без переплат, скрытых условий и лишних подписок.</p>
+        <div class="hero-badges">
+          <div class="hbadge">
+            <span class="hbadge-ico">♾️</span>
+            <div>
+              <div class="hbadge-t" style="font-weight:700">Безлимит на T2</div>
+              <div style="font-size:.7rem;color:var(--gray2);margin-top:2px">звонки и интернет</div>
+            </div>
+          </div>
+          <div class="hbadge">
+            <span class="hbadge-ico">🎁</span>
+            <div>
+              <div class="hbadge-t" style="font-weight:700">200 ₽ на баланс</div>
+              <div style="font-size:.7rem;color:var(--gray2);margin-top:2px">при активации карты</div>
+            </div>
+          </div>
+          <div class="hbadge">
+            <span class="hbadge-ico">📦</span>
+            <div>
+              <div class="hbadge-t" style="font-weight:700">Доставка бесплатно</div>
+              <div style="font-size:.7rem;color:var(--gray2);margin-top:2px">Почта · Озон · Пятёрочка</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-cta-row">
+          <a href="#order" class="btn-mag btn-lg">Заказать сим-карту</a>
+          <a href="#plans" style="font-size:.88rem;color:var(--gray);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">Смотреть тарифы →</a>
+        </div>
+        <div class="return-note">
+          🎁 При активации SIM-карты 200 ₽ автоматически зачислятся на ваш баланс T2
+        </div>
+      </div>
+      <div class="hero-right rv rv1">
+        <div class="hero-img-mock">
+          <span class="neon-ico">❤️</span>
+          <span class="neon-ico">👍</span>
+          <span class="neon-ico">📱</span>
+          <div class="hero-img-text">T2</div>
+          <div class="hero-float">
+            <div class="hf-logo"><span class="m">ПРО100</span>СИМка</div>
+            <div class="hf-sub">другие правила<br/>другие возможности</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ PLANS ════════════════ -->
+<section class="plans-sec" id="plans">
+  <div class="wrap">
+    <h2 class="sec-title rv">Выбери свой тариф</h2>
+    <p class="sec-sub rv">Три тарифа для любых потребностей. Все с безлимитом T2→T2.</p>
+    <div class="plans-grid">
+
+      <div class="plan rv rv1" onclick="selectPlanCard('M',this)">
+        <div class="plan-head">
+          <div class="plan-title">ПАРТНЁР <span class="m">M</span></div>
+          <div class="plan-price-tag">300 ₽<small>/мес</small></div>
+        </div>
+        <ul class="plan-feats">
+          <li><span class="fi-ico">♾️</span>Безлимитный интернет</li>
+          <li><span class="fi-ico">✉️</span>200 SMS</li>
+          <li><span class="fi-ico">📞</span>1 000 минут на все номера России</li>
+          <li><span class="fi-ico">⚡</span>Безлимит на T2</li>
+        </ul>
+        <button class="btn-mag btn-full" onclick="selectPlanCard('M',this.closest('.plan'));jumpToOrder()">Выбрать</button>
+      </div>
+
+      <div class="plan rv rv2" onclick="selectPlanCard('L',this)">
+        <div class="plan-head">
+          <div class="plan-title">ПАРТНЁР <span class="m">L</span></div>
+          <div class="plan-price-tag">350 ₽<small>/мес</small></div>
+        </div>
+        <ul class="plan-feats">
+          <li><span class="fi-ico">📶</span>50 + 50 ГБ интернета</li>
+          <li><span class="fi-ico">✉️</span>300 SMS</li>
+          <li><span class="fi-ico">📞</span>2 000 минут на все номера России</li>
+          <li><span class="fi-ico">⚡</span>Безлимит на T2</li>
+        </ul>
+        <button class="btn-mag btn-full" onclick="selectPlanCard('L',this.closest('.plan'));jumpToOrder()">Выбрать</button>
+      </div>
+
+      <div class="plan hot rv rv3" onclick="selectPlanCard('LMAX',this)">
+        <div class="hit-badge">ХИТ</div>
+        <div class="plan-head">
+          <div class="plan-title">ПАРТНЁР <span class="m">L MAX</span></div>
+          <div class="plan-price-tag">500 ₽<small>/мес</small></div>
+        </div>
+        <ul class="plan-feats">
+          <li><span class="fi-ico">♾️</span>Безлимитный интернет</li>
+          <li><span class="fi-ico">✉️</span>300 SMS</li>
+          <li><span class="fi-ico">📞</span>2 000 минут на все номера России</li>
+          <li><span class="fi-ico">⚡</span>Безлимит на T2</li>
+        </ul>
+        <button class="btn-mag btn-full" onclick="selectPlanCard('LMAX',this.closest('.plan'));jumpToOrder()">Выбрать</button>
+      </div>
+
+    </div>
+    <div class="cashback-note rv">
+      🎁 <span onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">При активации SIM-карты 200 ₽ автоматически зачислятся на ваш баланс T2</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<section class="how-sec" id="how">
+  <div class="wrap">
+    <h2 class="sec-title rv">Как это работает</h2>
+    <div class="how-steps rv">
+      <div class="how-step">
+        <div class="how-ico">📋</div>
+        <div class="how-n">1</div>
+        <div class="how-lbl">Выбираем тариф</div>
+      </div>
+      <div class="how-step">
+        <div class="how-ico">✍️</div>
+        <div class="how-n">2</div>
+        <div class="how-lbl">Заполняем данные и доставку</div>
+      </div>
+      <div class="how-step">
+        <div class="how-ico">💳</div>
+        <div class="how-n">3</div>
+        <div class="how-lbl">Оплачиваем 200 ₽</div>
+      </div>
+      <div class="how-step">
+        <div class="how-ico">📦</div>
+        <div class="how-n">4</div>
+        <div class="how-lbl">Получаем и активируем SIM</div>
+      </div>
+      <div class="how-step">
+        <div class="how-ico">🎁</div>
+        <div class="how-n">5</div>
+        <div class="how-lbl">200 ₽ возвращаются на баланс</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ ORDER FUNNEL ════════════════ -->
+<section class="order-sec" id="order">
+  <div class="wrap-sm">
+    <h2 class="sec-title rv" style="margin-bottom:32px">Оформи заказ</h2>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-bar" id="progressBar">
+      <div class="pb-step active" id="pb1">
+        <div class="pb-num">1</div>
+        <div class="pb-lbl">Тариф</div>
+      </div>
+      <div class="pb-line" id="pl1"></div>
+      <div class="pb-step" id="pb2">
+        <div class="pb-num">2</div>
+        <div class="pb-lbl">Данные</div>
+      </div>
+      <div class="pb-line" id="pl2"></div>
+      <div class="pb-step" id="pb3">
+        <div class="pb-num">3</div>
+        <div class="pb-lbl">Доставка</div>
+      </div>
+      <div class="pb-line" id="pl3"></div>
+      <div class="pb-step" id="pb4">
+        <div class="pb-num">4</div>
+        <div class="pb-lbl">Оплата</div>
+      </div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="summary-bar" id="summaryBar" style="display:none">
+      <div class="sum-item"><div class="sum-lbl">Тариф</div><div class="sum-val m" id="sumPlan">—</div></div>
+      <div class="sum-divider"></div>
+      <div class="sum-item"><div class="sum-lbl">Доставка</div><div class="sum-val" id="sumDeliv">—</div></div>
+      <div class="sum-divider"></div>
+      <div class="sum-item"><div class="sum-lbl">К оплате</div><div class="sum-val m" id="sumPrice">—</div></div>
+    </div>
+
+    <!-- ═══ ШАГ 1: ТАРИФ ═══ -->
+    <div class="funnel-steps active" id="fs1">
+      <div class="step-box">
+        <div class="step-lbl">1. Выбери тариф</div>
+
+        <div class="sel-plan on" data-plan="LMAX" onclick="choosePlan(this)">
+          <div class="sel-plan-radio"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+              <div class="sel-plan-name">ПАРТНЁР L MAX</div>
+              <div class="sel-plan-price">500 ₽/мес</div>
+            </div>
+            <div class="sel-plan-feats">♾️ Безлимит интернет · 📞 2000 мин · ✉️ 300 СМС · ⚡ Безлимит T2</div>
+          </div>
+        </div>
+
+        <div class="sel-plan" data-plan="L" onclick="choosePlan(this)">
+          <div class="sel-plan-radio"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+              <div class="sel-plan-name">ПАРТНЁР L</div>
+              <div class="sel-plan-price">350 ₽/мес</div>
+            </div>
+            <div class="sel-plan-feats">📶 50+50 ГБ интернет · 📞 2000 мин · ✉️ 300 СМС · ⚡ Безлимит T2</div>
+          </div>
+        </div>
+
+        <div class="sel-plan" data-plan="M" onclick="choosePlan(this)">
+          <div class="sel-plan-radio"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+              <div class="sel-plan-name">ПАРТНЁР M</div>
+              <div class="sel-plan-price">300 ₽/мес</div>
+            </div>
+            <div class="sel-plan-feats">♾️ Безлимит интернет · 📞 1000 мин · ✉️ 200 СМС · ⚡ Безлимит T2</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-nav">
+        <button class="btn-mag" style="width:100%" onclick="goStep(2)">Далее: Ввести данные →</button>
+      </div>
+    </div>
+
+    <!-- ═══ ШАГ 2: ДАННЫЕ ═══ -->
+    <div class="funnel-steps" id="fs2">
+      <div class="step-box">
+        <div class="step-lbl">2. Введи данные</div>
+        <div class="in-wrap">
+          <label class="form-lbl">Фамилия *</label>
+          <input class="form-in" id="inFam" type="text" placeholder="Иванов" autocomplete="family-name"/>
+          <span class="emsg" id="eFam">Введите фамилию</span>
+        </div>
+        <div class="in-wrap">
+          <label class="form-lbl">Имя *</label>
+          <input class="form-in" id="inIm" type="text" placeholder="Иван" autocomplete="given-name"/>
+          <span class="emsg" id="eIm">Введите имя</span>
+        </div>
+        <div class="in-wrap">
+          <label class="form-lbl">Отчество</label>
+          <input class="form-in" id="inOtch" type="text" placeholder="Иванович" autocomplete="additional-name"/>
+        </div>
+        <div class="in-wrap">
+          <label class="form-lbl">Номер для связи *</label>
+          <input class="form-in" id="inPhone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel"/>
+          <span class="emsg" id="ePhone">Введите корректный номер</span>
+        </div>
+      </div>
+      <input type="hidden" id="bloggerField" value=""/>
+      <div class="step-nav">
+        <span class="step-back" onclick="goStep(1)">← Назад</span>
+        <button class="btn-mag" onclick="validateStep2()">Далее: Адрес доставки →</button>
+      </div>
+    </div>
+
+    <!-- ═══ ШАГ 3: ДОСТАВКА ═══ -->
+    <div class="funnel-steps" id="fs3">
+      <div class="step-box">
+        <div class="step-lbl">3. Адрес и способ доставки</div>
+
+        <div class="in-wrap">
+          <label class="form-lbl">Город *</label>
+          <input class="form-in" id="inCity" type="text" placeholder="Москва" autocomplete="address-level2"/>
+          <span class="emsg" id="eCity">Введите город</span>
+        </div>
+        <div class="in-wrap">
+          <label class="form-lbl">Улица, дом, квартира *</label>
+          <input class="form-in" id="inStreet" type="text" placeholder="ул. Ленина, д. 1, кв. 5" autocomplete="street-address"/>
+          <span class="emsg" id="eStreet">Введите улицу и дом</span>
+        </div>
+        <div class="in-wrap">
+          <label class="form-lbl">Индекс <span style="color:var(--gray2);font-weight:400;font-size:.7rem">(по желанию)</span></label>
+          <input class="form-in" id="inIdx" type="text" placeholder="123456"/>
+        </div>
+
+        <div class="step-lbl" style="margin-top:20px;margin-bottom:10px">Способ доставки</div>
+        <div class="deliv-opts">
+          <div class="deliv-opt on" data-deliv="Почта России" onclick="chooseDeliv(this)">
+            <div class="deliv-opt-radio"></div>
+            <div>
+              <div class="deliv-name">📮 Почта России</div>
+              <div class="deliv-sub">3–7 дней · Бесплатно</div>
+            </div>
+          </div>
+          <div class="deliv-opt" data-deliv="Постамат Озон" onclick="chooseDeliv(this)">
+            <div class="deliv-opt-radio"></div>
+            <div>
+              <div class="deliv-name" style="color:var(--white)"><span style="color:#005bff;font-weight:900">OZON</span> Постамат</div>
+              <div class="deliv-sub">1–3 дня · Бесплатно</div>
+            </div>
+          </div>
+          <div class="deliv-opt" data-deliv="Пятёрочка Постамат" onclick="chooseDeliv(this)">
+            <div class="deliv-opt-radio"></div>
+            <div>
+              <div class="deliv-name">🍎 Пятёрочка Постамат</div>
+              <div class="deliv-sub">1–3 дня · Бесплатно</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-nav">
+        <span class="step-back" onclick="goStep(2)">← Назад</span>
+        <button class="btn-mag" onclick="validateStep3()">Перейти к оплате →</button>
+      </div>
+    </div>
+
+    <!-- ═══ ШАГ 4: ОПЛАТА ═══ -->
+    <div class="funnel-steps" id="fs4">
+      <div class="payment-box">
+        <div class="payment-title">💳 Онлайн-касса</div>
+        <div class="payment-sub">Безопасная оплата банковской картой или через СБП</div>
+
+        <div class="payment-amount">
+          <div class="pa-label">К оплате</div>
+          <div class="pa-sum" id="paSum">200 ₽</div>
+          <div class="pa-return">🎁 <b>200 ₽ вернутся на баланс</b> при активации SIM-карты</div>
+        </div>
+
+        <div class="cashback-guarantee">
+          <div class="cg-title">🔒 Гарантия возврата на баланс</div>
+          <div class="cg-desc">Вы ничего не теряете — платите 200 ₽ сейчас, при активации SIM-карты эта сумма автоматически зачисляется на счёт T2.</div>
+        </div>
+
+        <div class="payment-methods">
+          <div class="pm-label">Способ оплаты</div>
+          <div class="pm-logos">
+            <div class="pm-logo pm-mir" onclick="setPayMethod(this,'МИР')" style="cursor:pointer;border-color:var(--mag)">МИР</div>
+            <div class="pm-logo pm-visa" onclick="setPayMethod(this,'Visa')" style="cursor:pointer">Visa</div>
+            <div class="pm-logo" onclick="setPayMethod(this,'Mastercard')" style="cursor:pointer;font-size:1.2rem">🔴🟡</div>
+            <div class="pm-logo pm-sbp" onclick="setPayMethod(this,'СБП')" style="cursor:pointer">СБП⚡</div>
+          </div>
+          <div id="cardFields">
+            <input class="pm-card-input" id="cardNum" type="text" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric"/>
+            <div class="pm-card-row">
+              <input class="pm-card-input" id="cardExp" type="text" placeholder="ММ/ГГ" maxlength="5" inputmode="numeric"/>
+              <input class="pm-card-input" id="cardCvv" type="text" placeholder="CVV" maxlength="3" inputmode="numeric"/>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-mag btn-full btn-lg" id="payBtn" onclick="doPayment()">
+          Оплатить <span id="payBtnSum">200 ₽</span>
+        </button>
+        <div class="secure-note">🔐 Безопасное соединение SSL · Данные защищены</div>
+      </div>
+      <div style="text-align:center;margin-top:14px">
+        <span class="step-back" onclick="goStep(3)">← Назад к доставке</span>
+      </div>
+    </div>
+
+    <!-- ═══ ЭКРАН УСПЕХА ═══ -->
+    <div class="success-screen" id="successScreen">
+      <span class="ss-ico">🎉</span>
+      <h3 class="ss-h">Заказ оформлен!</h3>
+      <p class="ss-sub">Ваша SIM-карта T2 уже в пути.<br/>Менеджер свяжется с вами для подтверждения.</p>
+      <div class="ss-return">
+        <div class="ss-return-t">🎁 Оплата вернётся на баланс</div>
+        <div class="ss-return-d">При активации SIM-карты оплаченная сумма автоматически зачислится на ваш счёт T2. Вы сможете ей воспользоваться на 2й месяц!</div>
+      </div>
+      <div class="ss-blogger" id="ssBlogger"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════ WHY T2 ════════════════ -->
+<section class="why-sec">
+  <div class="wrap">
+    <h2 class="sec-title rv">Почему T2?</h2>
+    <div class="why-grid">
+      <div class="why-card rv rv1">
+        <div class="why-ico">✅</div>
+        <div class="why-t">Честные условия</div>
+        <div class="why-d">Без скрытых подписок и дополнительных списаний</div>
+      </div>
+      <div class="why-card rv rv2">
+        <div class="why-ico">📡</div>
+        <div class="why-t">Качественная связь</div>
+        <div class="why-d">4G+ по всей России, даже в небольших городах</div>
+      </div>
+      <div class="why-card rv rv3">
+        <div class="why-ico">🚀</div>
+        <div class="why-t">Быстрая доставка</div>
+        <div class="why-d">Удобным способом: Почта, Озон, Пятёрочка</div>
+      </div>
+      <div class="why-card rv">
+        <div class="why-ico">🎁</div>
+        <div class="why-t">Деньги возвращаются</div>
+        <div class="why-d">Оплата при заказе возвращается на баланс T2</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-in">
+      <div class="foot-logo">
+        <svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="38" height="38" rx="9" fill="#0d0d0d" stroke="#ff3495" stroke-width="1.5"/>
+          <text x="20" y="26" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="18" fill="#ff3495" letter-spacing="-1">t2</text>
+          <text x="50" y="15" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="9" fill="#ff3495" letter-spacing="1.5">ПРО100</text>
+          <rect x="50" y="19" width="108" height="1" fill="#1e1e1e"/>
+          <text x="50" y="31" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="15" fill="#ffffff" letter-spacing="1.2">СИМка</text>
+          <text x="50" y="39" font-family="Arial,sans-serif" font-size="7" font-weight="500" fill="#2a2a2a" letter-spacing="1.2">PRO100SIMKA.RU</text>
+        </svg>
+      </div>
+      <nav class="foot-nav">
+        <a href="#plans">О тарифах</a>
+        <a href="#how">Доставка и оплата</a>
+        <a href="#order">Вопросы и ответы</a>
+        <a href="#order">Контакты</a>
+      </nav>
+      <div class="foot-copy">© 2024 T2. Все права защищены.</div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ════════════════════ JAVASCRIPT ════════════════════ -->
+<script>
+/* ──────────────────────────────────────────────────
+   СОСТОЯНИЕ ЗАКАЗА
+────────────────────────────────────────────────── */
+const ORDER = {
+  plan: 'LMAX', planPrice: 500,
+  fam: '', im: '', otch: '', phone: '',
+  idx: '', city: '', street: '',
+  deliv: 'Почта России',
+  blogger: 'прямой переход',
+  payMethod: 'МИР',
+};
+const PLAN_DATA = {
+  M:    { label: 'Партнёр M',    price: 300 },
+  L:    { label: 'Партнёр L',    price: 350 },
+  LMAX: { label: 'Партнёр L MAX', price: 500 },
+};
+
+/* ──────────────────────────────────────────────────
+   1. ТРЕКИНГ БЛОГЕРА
+   URL-параметры: ?ref= | ?blogger= | ?utm_source=
+   Пример: https://pro100simka.ru/?ref=name_blogger
+────────────────────────────────────────────────── */
+;(function initBlogger(){
+  const p = new URLSearchParams(location.search);
+  const raw = p.get('ref') || p.get('blogger') || p.get('utm_source') || null;
+  ORDER.blogger = raw ? decodeURIComponent(raw).trim() : 'прямой переход';
+  if(document.getElementById('bloggerField')) document.getElementById('bloggerField').value = ORDER.blogger;
+  console.log('[ПРО100СИМка] Блогер-источник:', ORDER.blogger);
+  if(raw){
+    const pill = document.getElementById('bPill');
+    document.getElementById('bPillTxt').textContent = '👤 ' + ORDER.blogger;
+    pill.classList.add('on');
+  }
+})();
+
+/* ──────────────────────────────────────────────────
+   2. ПРОГРЕСС-БАР
+────────────────────────────────────────────────── */
+let curStep = 1;
+function updateProgress(step){
+  curStep = step;
+  for(let i=1;i<=4;i++){
+    const pb = document.getElementById('pb'+i);
+    pb.classList.remove('active','done');
+    if(i < step) pb.classList.add('done');
+    if(i === step) pb.classList.add('active');
+    const numEl = pb.querySelector('.pb-num');
+    numEl.textContent = i < step ? '✓' : i;
+  }
+  for(let i=1;i<=3;i++){
+    const pl = document.getElementById('pl'+i);
+    pl.classList.toggle('done', i < step);
+  }
+  // Show summary bar from step 2
+  document.getElementById('summaryBar').style.display = step >= 2 ? 'flex' : 'none';
+  updateSummary();
+}
+
+function goStep(n){
+  document.querySelectorAll('.funnel-steps').forEach(el=>el.classList.remove('active'));
+  document.getElementById('fs'+n).classList.add('active');
+  updateProgress(n);
+  document.getElementById('order').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ──────────────────────────────────────────────────
+   3. СВОДКА
+────────────────────────────────────────────────── */
+function updateSummary(){
+  const pd = PLAN_DATA[ORDER.plan];
+  document.getElementById('sumPlan').textContent  = pd.label;
+  document.getElementById('sumDeliv').textContent = ORDER.deliv;
+  document.getElementById('sumPrice').textContent = '200 ₽';
+  document.getElementById('paSum').textContent    = '200 ₽';
+  document.getElementById('payBtnSum').textContent= '200 ₽';
+}
+
+/* ──────────────────────────────────────────────────
+   4. ВЫБОР ТАРИФА
+────────────────────────────────────────────────── */
+function choosePlan(el){
+  document.querySelectorAll('.sel-plan').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  ORDER.plan = el.dataset.plan;
+  ORDER.planPrice = PLAN_DATA[ORDER.plan].price;
+  updateSummary();
+}
+function selectPlanCard(key, el){
+  ORDER.plan = key;
+  ORDER.planPrice = PLAN_DATA[key].price;
+  // Sync in funnel
+  document.querySelectorAll('.sel-plan').forEach(e=>{
+    e.classList.toggle('on', e.dataset.plan === key);
+  });
+  updateSummary();
+}
+function jumpToOrder(){
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+}
+
+/* ──────────────────────────────────────────────────
+   5. БАЗА НОМЕРОВ
+────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────
+   6. ВЫБОР ДОСТАВКИ
+────────────────────────────────────────────────── */
+function chooseDeliv(el){
+  document.querySelectorAll('.deliv-opt').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  ORDER.deliv = el.dataset.deliv;
+  updateSummary();
+}
+
+/* ──────────────────────────────────────────────────
+   7. МАСКА ТЕЛЕФОНА
+────────────────────────────────────────────────── */
+document.getElementById('inPhone').addEventListener('input', function(){
+  let v = this.value.replace(/\D/g,'');
+  if(v.startsWith('8')) v = '7'+v.slice(1);
+  let r = '';
+  if(v.length>0) r='+7';
+  if(v.length>1) r+='('+v.slice(1,4);
+  if(v.length>=4) r+=') '+v.slice(4,7);
+  if(v.length>=7) r+='-'+v.slice(7,9);
+  if(v.length>=9) r+='-'+v.slice(9,11);
+  this.value=r;
+});
+
+/* Карта маска */
+document.getElementById('cardNum').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,16);
+  this.value=v.replace(/(\d{4})/g,'$1 ').trim();
+});
+document.getElementById('cardExp').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+  this.value=v;
+});
+document.getElementById('cardCvv').addEventListener('input',function(){
+  this.value=this.value.replace(/\D/g,'').slice(0,3);
+});
+
+/* ──────────────────────────────────────────────────
+   8. СПОСОБ ОПЛАТЫ
+────────────────────────────────────────────────── */
+function setPayMethod(el, method){
+  document.querySelectorAll('.pm-logo').forEach(e=>e.style.borderColor='var(--border)');
+  el.style.borderColor='var(--mag)';
+  ORDER.payMethod = method;
+  document.getElementById('cardFields').style.display = method==='СБП' ? 'none' : 'block';
+}
+
+/* ──────────────────────────────────────────────────
+   9. ВАЛИДАЦИЯ — ШАГ 2 (ДАННЫЕ)
+────────────────────────────────────────────────── */
+function validateStep2(){
+  let ok = true;
+  const show=(eid,iid,cond)=>{
+    document.getElementById(eid).classList.toggle('on',cond);
+    if(iid) document.getElementById(iid).classList.toggle('err',cond);
+    if(cond) ok=false;
+  };
+  show('eFam','inFam',!document.getElementById('inFam').value.trim());
+  show('eIm','inIm',!document.getElementById('inIm').value.trim());
+  const ph = document.getElementById('inPhone').value.replace(/[^0-9]/g,'');
+  show('ePhone','inPhone', ph.length < 10);
+  if(ok){
+    ORDER.fam   = document.getElementById('inFam').value.trim();
+    ORDER.im    = document.getElementById('inIm').value.trim();
+    ORDER.otch  = document.getElementById('inOtch').value.trim();
+    ORDER.phone = document.getElementById('inPhone').value.trim();
+    goStep(3);
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   10. ВАЛИДАЦИЯ — ШАГ 3 (ДОСТАВКА)
+────────────────────────────────────────────────── */
+function validateStep3(){
+  let ok = true;
+  const show=(eid,iid,cond)=>{
+    document.getElementById(eid).classList.toggle('on',cond);
+    if(iid) document.getElementById(iid).classList.toggle('err',cond);
+    if(cond) ok=false;
+  };
+  show('eCity','inCity',!document.getElementById('inCity').value.trim());
+  show('eStreet','inStreet',!document.getElementById('inStreet').value.trim());
+  if(ok){
+    ORDER.city   = document.getElementById('inCity').value.trim();
+    ORDER.street = document.getElementById('inStreet').value.trim();
+    ORDER.idx    = document.getElementById('inIdx').value.trim();
+    goStep(4);
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   11. ОПЛАТА
+   ┌────────────────────────────────────────────────────┐
+   │ ИНТЕГРАЦИЯ РЕАЛЬНОГО ПЛАТЁЖНОГО ШЛЮЗА:             │
+   │                                                    │
+   │ Замените блок setTimeout ниже на:                  │
+   │                                                    │
+   │ 1. ЮКасса / Robokassa / CloudPayments:             │
+   │    Инициализируйте виджет оплаты с суммой          │
+   │    ORDER.planPrice, передайте метаданные заказа.   │
+   │                                                    │
+   │ 2. После успешной оплаты — вызовите showSuccess()  │
+   │                                                    │
+   │ 3. Отправьте данные на бэкенд:                     │
+   │    POST https://pro100simka.ru/api/order                 │
+   │    Body: JSON.stringify(ORDER)                     │
+   │                                                    │
+   │ Пример webhook: при получении сим менеджер         │
+   │ зачисляет сумму на баланс T2 вручную или через API │
+   └────────────────────────────────────────────────────┘
+────────────────────────────────────────────────── */
+async function doPayment(){
+  const btn = document.getElementById('payBtn');
+  btn.disabled=true;
+  btn.textContent='⏳ Обработка оплаты...';
+
+  const payload = {
+    ...ORDER,
+    timestamp: new Date().toISOString(),
+    pageUrl: location.href,
+    source: 'pro100simka.ru',
+  };
+
+  console.log('═══════════════════════════════════════════════');
+  console.log('[ПРО100СИМка] 💳 ИМИТАЦИЯ ОПЛАТЫ');
+  console.table(payload);
+  console.log('[ПРО100СИМка] Сумма: 200 ₽ (фиксированная) | Метод:', ORDER.payMethod);
+  console.log('[ПРО100СИМка] Блогер-источник:', ORDER.blogger);
+  console.log('═══════════════════════════════════════════════');
+
+  // ЗАМЕНИТЬ на реальный платёжный шлюз
+  // Например: new cp.CloudPayments(); или открыть iframe YooKassa
+    // ─── ОТПРАВКА В GOOGLE SHEETS (через FormData — обход CORS) ───
+  try {
+    const APPS_URL = 'https://script.google.com/macros/s/AKfycbx8aMRR3KTVsSEAx-Hqqekd0SlgTfJKp8wLhPzinJvRWdC2sUSeMXyiojkKhWMGHK8uKQ/exec';
+
+    // Google Apps Script требует form-data, не JSON — иначе CORS блокирует
+    const form = new FormData();
+    form.append('fam',      ORDER.fam);
+    form.append('im',       ORDER.im);
+    form.append('otch',     ORDER.otch);
+    form.append('phone',    ORDER.phone);
+    form.append('plan',     PLAN_DATA[ORDER.plan].label);
+    form.append('delivery', ORDER.deliv);
+    form.append('city',     ORDER.city);
+    form.append('street',   ORDER.street);
+    form.append('blogger',  ORDER.blogger);
+    form.append('sum',      '200 ₽');
+    form.append('source',   'pro100simka.ru');
+
+    // no-cors — позволяет отправить без preflight, ответ будет opaque (это норм)
+    fetch(APPS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: form
+    }).catch(err => console.warn('[ПРО100СИМка] fetch warn:', err));
+
+    // Показываем успех сразу — данные уходят асинхронно
+    showSuccess();
+
+  } catch(err) {
+    console.error('[ПРО100СИМка] Ошибка:', err);
+    showSuccess();
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   12. ЭКРАН УСПЕХА
+────────────────────────────────────────────────── */
+function showSuccess(){
+  // Скрываем весь funnel
+  document.getElementById('progressBar').style.display='none';
+  document.getElementById('summaryBar').style.display='none';
+  document.querySelectorAll('.funnel-steps').forEach(el=>el.classList.remove('active'));
+
+  const ss = document.getElementById('successScreen');
+  ss.classList.add('on');
+
+  const isOrganic = ORDER.blogger === 'прямой переход';
+  document.getElementById('ssBlogger').textContent = isOrganic
+    ? '📲 Заказ оформлен напрямую через pro100simka.ru'
+    : `🎥 Вы пришли от блогера: ${ORDER.blogger}`;
+
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+}
+
+/* ──────────────────────────────────────────────────
+   13. SCROLL REVEAL
+────────────────────────────────────────────────── */
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); }
+  });
+},{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* ──────────────────────────────────────────────────
+   INIT
+────────────────────────────────────────────────── */
+updateProgress(1);
+updateSummary();
+</script>
+</body>
+</html>
+<!-- LOGO SVG DEFINITIONS - можно использовать везде на сайте -->
+<!-- 
+  КАК ВСТАВИТЬ ЛОГОТИП В НАВБАР:
+  Замените блок .nav-logo в HTML на:
+
+  <div class="nav-logo">
+    <svg width="160" height="40" viewBox="0 0 160 40">
+      <rect x="0" y="0" width="38" height="38" rx="8" fill="#ff3495"/>
+      <text x="19" y="26" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="18" fill="#fff" letter-spacing="-1">t2</text>
+      <rect x="46" y="6" width="1.5" height="26" rx="1" fill="#2a2a2a"/>
+      <text x="54" y="17" font-family="Arial Black,sans-serif" font-weight="900" font-size="9" fill="#ff3495" letter-spacing="1.5">ПРО100</text>
+      <text x="54" y="33" font-family="Arial Black,sans-serif" font-weight="900" font-size="14" fill="#fff" letter-spacing="0.3">СИМка</text>
+    </svg>
+  </div>
+-->
