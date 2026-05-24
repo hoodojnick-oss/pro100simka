@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ПРО100СИМка — Кабинет блогера</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ═══ RESET & VARS ═══ */
+:root{
+  --bg:#0d0d0d;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --mag:#ff3495;--mag2:#e02080;--mag-glow:rgba(255,52,149,.25);
+  --white:#fff;--g20:#ccc;--g40:#888;--g60:#444;--g70:#2a2a2a;
+  --border:#1e1e1e;--r:10px;--r2:14px;--r3:20px;
+  --fh:'Unbounded',sans-serif;--fb:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--white);
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:var(--fb)}
+
+/* ═══ PAGES ═══ */
+.page{display:none;min-height:100vh}
+.page.active{display:flex;flex-direction:column}
+
+/* ═══ BUTTONS ═══ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--fb);font-weight:700;font-size:.9rem;border-radius:100px;
+  padding:13px 28px;cursor:pointer;border:none;transition:transform .15s,box-shadow .15s;white-space:nowrap}
+.btn-mag{background:var(--mag);color:#fff}
+.btn-mag:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--mag-glow)}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid var(--g60)}
+.btn-ghost:hover{border-color:var(--white)}
+.btn-full{width:100%}
+.btn-sm{padding:8px 18px;font-size:.78rem}
+
+/* ═══ FORM INPUTS ═══ */
+.fi{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:13px 16px;color:var(--white);font-family:var(--fb);font-size:.93rem;outline:none;
+  transition:border-color .2s;-webkit-appearance:none;margin-bottom:12px}
+.fi::placeholder{color:var(--g60)}
+.fi:focus{border-color:var(--mag)}
+.fi.err{border-color:#ef4444}
+.fl{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--g40);margin-bottom:6px}
+.emsg{font-size:.72rem;color:#ef4444;margin:-8px 0 10px}
+
+/* ═══ NAV ═══ */
+.nav{background:rgba(13,13,13,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-box{width:34px;height:34px;background:var(--mag);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-weight:900;font-size:.8rem;color:#fff;letter-spacing:-.05em}
+.nav-logo-name{font-family:var(--fh);font-weight:800;font-size:.95rem;letter-spacing:-.03em}
+.nav-logo-name .m{color:var(--mag)}
+.nav-logo-sub{font-size:.6rem;color:var(--g60);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-user{font-size:.8rem;color:var(--g40);display:flex;align-items:center;gap:6px}
+.nav-user-dot{width:6px;height:6px;border-radius:50%;background:var(--mag);flex-shrink:0}
+
+/* ═══ SIDEBAR ═══ */
+.layout{display:flex;flex:1}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0}
+.sidebar-menu{display:flex;flex-direction:column;gap:2px;padding:0 10px}
+.smenu-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);
+  font-size:.83rem;font-weight:500;color:var(--g40);cursor:pointer;transition:background .15s,color .15s}
+.smenu-item:hover{background:var(--bg3);color:var(--white)}
+.smenu-item.active{background:rgba(255,52,149,.12);color:var(--mag);font-weight:600}
+.smenu-item .sico{font-size:1rem;flex-shrink:0}
+.sidebar-sep{height:1px;background:var(--border);margin:10px 10px}
+
+/* ═══ MAIN CONTENT ═══ */
+.main{flex:1;padding:28px 32px;overflow-y:auto}
+
+/* ═══ STATS GRID ═══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--mag);opacity:0}
+.stat-card.accent::before{opacity:1}
+.stat-lbl{font-size:.72rem;font-weight:600;color:var(--g40);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:8px}
+.stat-val{font-family:var(--fh);font-weight:800;font-size:1.7rem;letter-spacing:-.03em;line-height:1}
+.stat-val.mag{color:var(--mag)}
+.stat-sub{font-size:.72rem;color:var(--g40);margin-top:5px}
+.stat-badge{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:600;
+  padding:2px 8px;border-radius:100px;margin-top:5px}
+.badge-green{background:rgba(34,197,94,.12);color:#22c55e}
+.badge-gray{background:var(--bg3);color:var(--g40)}
+
+/* ═══ SECTION TITLES ═══ */
+.sec-title{font-family:var(--fh);font-weight:800;font-size:1rem;letter-spacing:-.02em;
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-title-sub{font-size:.75rem;color:var(--g40);font-family:var(--fb);font-weight:400;text-transform:none;letter-spacing:0}
+
+/* ═══ CHART ═══ */
+.chart-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:24px}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:12px}
+.chart-bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.chart-bar{background:rgba(255,52,149,.25);border-radius:4px 4px 0 0;width:100%;
+  transition:background .2s;cursor:pointer;min-height:4px;position:relative}
+.chart-bar:hover{background:var(--mag)}
+.chart-bar-val{font-size:.6rem;color:var(--g40);position:absolute;top:-16px;left:50%;
+  transform:translateX(-50%);white-space:nowrap}
+.chart-month{font-size:.62rem;color:var(--g60);text-align:center}
+
+/* ═══ TABLE ═══ */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:24px}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.table-search{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:8px 14px;color:var(--white);font-size:.82rem;outline:none;width:220px;transition:border-color .2s}
+.table-search::placeholder{color:var(--g60)}
+.table-search:focus{border-color:var(--mag)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg3);padding:10px 16px;font-size:.7rem;font-weight:700;
+  color:var(--g40);text-transform:uppercase;letter-spacing:.08em;text-align:left;
+  border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
+.td-num{font-family:var(--fh);font-weight:600;font-size:.8rem;color:var(--white);letter-spacing:.02em}
+.td-mag{color:var(--mag);font-weight:600}
+.td-green{color:#22c55e;font-weight:600}
+.td-gray{color:var(--g40)}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.68rem;font-weight:700}
+.s-active{background:rgba(34,197,94,.12);color:#22c55e}
+.s-new{background:rgba(255,52,149,.12);color:var(--mag)}
+.s-pending{background:rgba(255,165,0,.12);color:#ffa500}
+
+/* ═══ EMPTY STATE ═══ */
+.empty{text-align:center;padding:40px 20px;color:var(--g40)}
+.empty-ico{font-size:2.5rem;margin-bottom:12px;display:block}
+.empty-t{font-size:.9rem;font-weight:600;margin-bottom:4px;color:var(--g20)}
+.empty-s{font-size:.78rem}
+
+/* ═══ LOGIN PAGE ═══ */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+  background:var(--bg)}
+.login-box{width:100%;max-width:400px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo-inner{display:inline-flex;align-items:center;gap:10px}
+.login-logo-box{width:44px;height:44px;background:var(--mag);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-weight:900;font-size:1rem;color:#fff}
+.login-logo-name{font-family:var(--fh);font-weight:900;font-size:1.2rem;letter-spacing:-.03em}
+.login-logo-name .m{color:var(--mag)}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);padding:32px}
+.login-title{font-family:var(--fh);font-weight:800;font-size:1.1rem;text-transform:uppercase;
+  margin-bottom:4px;letter-spacing:-.02em}
+.login-sub{font-size:.8rem;color:var(--g40);margin-bottom:24px}
+.login-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--r);
+  padding:10px 14px;font-size:.8rem;color:#ef4444;margin-bottom:14px;display:none}
+.login-err.show{display:block}
+.login-footer{text-align:center;font-size:.72rem;color:var(--g60);margin-top:16px}
+
+/* ═══ ADMIN PANEL ═══ */
+.admin-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--r);padding:4px;width:fit-content}
+.admin-tab{padding:8px 20px;border-radius:7px;font-size:.82rem;font-weight:600;
+  cursor:pointer;color:var(--g40);transition:background .15s,color .15s}
+.admin-tab.active{background:var(--mag);color:#fff}
+
+/* Upload area */
+.upload-area{background:var(--bg2);border:2px dashed var(--g70);border-radius:var(--r2);
+  padding:40px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px}
+.upload-area:hover,.upload-area.drag{border-color:var(--mag);background:rgba(255,52,149,.04)}
+.upload-ico{font-size:2.5rem;margin-bottom:12px;display:block}
+.upload-title{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.upload-sub{font-size:.75rem;color:var(--g40)}
+.upload-progress{background:var(--bg3);border-radius:var(--r);overflow:hidden;height:6px;margin:12px 0;display:none}
+.upload-progress-bar{height:100%;background:var(--mag);border-radius:var(--r);transition:width .3s}
+.upload-result{display:none}
+
+/* Blogger manager */
+.blogger-list{display:flex;flex-direction:column;gap:8px}
+.blogger-row{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;display:flex;align-items:center;gap:14px}
+.blogger-avatar{width:38px;height:38px;border-radius:50%;background:rgba(255,52,149,.15);
+  border:1px solid rgba(255,52,149,.3);display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-weight:800;font-size:.8rem;color:var(--mag);flex-shrink:0}
+.blogger-info{flex:1;min-width:0}
+.blogger-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blogger-meta{font-size:.72rem;color:var(--g40);margin-top:2px}
+.blogger-stats{display:flex;gap:16px;flex-shrink:0}
+.blogger-stat{text-align:right}
+.blogger-stat-val{font-family:var(--fh);font-weight:700;font-size:.9rem;color:var(--mag)}
+.blogger-stat-lbl{font-size:.65rem;color:var(--g60)}
+
+/* Add blogger form */
+.add-blogger-form{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:20px;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ═══ PAYMENTS SECTION ═══ */
+.payments-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.pay-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px}
+
+/* ═══ NOTIFICATIONS ═══ */
+.toast{position:fixed;bottom:20px;right:20px;z-index:1000;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px 20px;font-size:.85rem;font-weight:600;
+  transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(34,197,94,.3);color:#22c55e}
+.toast.error{border-color:rgba(239,68,68,.3);color:#ef4444}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .sidebar{display:none}
+  .main{padding:20px 16px}
+  .form-row{grid-template-columns:1fr}
+}
+@media(max-width:540px){
+  .stats-grid{grid-template-columns:1fr}
+  .payments-summary{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: LOGIN
+═══════════════════════════════════════════════ -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-logo-inner">
+          <div class="login-logo-box">t2</div>
+          <div>
+            <div class="login-logo-name"><span class="m">ПРО100</span>СИМка</div>
+            <div style="font-size:.6rem;color:var(--g60);letter-spacing:.1em;text-transform:uppercase">Кабинет блогера</div>
+          </div>
+        </div>
+      </div>
+      <div class="login-card">
+        <h2 class="login-title">Вход в кабинет</h2>
+        <p class="login-sub">Введите логин и пароль, выданные вам</p>
+        <div class="login-err" id="loginErr">Неверный логин или пароль</div>
+        <label class="fl">Логин</label>
+        <input class="fi" type="text" id="loginInput" placeholder="Ваш логин" autocomplete="username"/>
+        <label class="fl">Пароль</label>
+        <input class="fi" type="password" id="passInput" placeholder="••••••••" autocomplete="current-password"/>
+        <button class="btn btn-mag btn-full" style="margin-top:4px" onclick="doLogin()">Войти</button>
+        <p class="login-footer">Проблемы со входом? Напишите администратору</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: BLOGGER DASHBOARD
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-box">t2</div>
+      <div>
+        <div class="nav-logo-name"><span class="m">ПРО100</span>СИМка</div>
+        <div class="nav-logo-sub">Кабинет блогера</div>
+      </div>
+    </div>
+    <div class="nav-r">
+      <div class="nav-user">
+        <span class="nav-user-dot"></span>
+        <span id="navBloggerName">Блогер</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-menu">
+        <div class="smenu-item active" onclick="showTab('overview')">
+          <span class="sico">📊</span> Обзор
+        </div>
+        <div class="smenu-item" onclick="showTab('subscribers')">
+          <span class="sico">📱</span> Абоненты
+        </div>
+        <div class="smenu-item" onclick="showTab('payments')">
+          <span class="sico">💰</span> Выплаты
+        </div>
+        <div class="smenu-item" onclick="showTab('link')">
+          <span class="sico">🔗</span> Моя ссылка
+        </div>
+        <div class="sidebar-sep"></div>
+        <div class="smenu-item" onclick="doLogout()" style="color:var(--g60)">
+          <span class="sico">🚪</span> Выйти
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- TAB: OVERVIEW -->
+      <div id="tab-overview">
+        <div class="sec-title" style="margin-bottom:20px">
+          Добрый день, <span id="dashGreeting" style="color:var(--mag)">Блогер</span>!
+          <span class="sec-title-sub" id="dashPeriod"></span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card accent">
+            <div class="stat-lbl">Выплата за месяц</div>
+            <div class="stat-val mag" id="statMonth">0 ₽</div>
+            <div class="stat-sub">Текущий период</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Всего выплачено</div>
+            <div class="stat-val" id="statTotal">0 ₽</div>
+            <div class="stat-sub">За всё время</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Активных абонентов</div>
+            <div class="stat-val" id="statSubs">0</div>
+            <div class="stat-badge badge-green" id="statSubsBadge">↑ 0 новых</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Переходов по ссылке</div>
+            <div class="stat-val" id="statClicks">—</div>
+            <div class="stat-sub">Данные из лендинга</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-wrap">
+          <div class="sec-title">Динамика выплат <span class="sec-title-sub">последние 6 месяцев</span></div>
+          <div class="chart-bars" id="chartBars"></div>
+          <div style="display:flex;gap:8px;margin-top:4px" id="chartMonths"></div>
+        </div>
+
+        <!-- Recent subs -->
+        <div class="sec-title">Последние подключения</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Номер</th>
+                <th>Дата активации</th>
+                <th>Тариф</th>
+                <th>Комиссия</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="recentTable">
+              <tr><td colspan="5"><div class="empty"><span class="empty-ico">📭</span><div class="empty-t">Нет данных</div><div class="empty-s">Данные появятся после загрузки отчёта T2</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: SUBSCRIBERS -->
+      <div id="tab-subscribers" style="display:none">
+        <div class="sec-title">Все абоненты <span class="sec-title-sub" id="subsCount"></span></div>
+        <div class="table-wrap">
+          <div class="table-head">
+            <div class="sec-title" style="margin-bottom:0;font-size:.85rem">Список абонентов</div>
+            <input class="table-search" type="text" placeholder="Поиск по номеру..." oninput="filterSubs(this.value)"/>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Номер SIM</th>
+                <th>Дата активации</th>
+                <th>Предыдущие периоды</th>
+                <th>За этот месяц</th>
+                <th>Всего</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="subsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: PAYMENTS -->
+      <div id="tab-payments" style="display:none">
+        <div class="sec-title">Выплаты</div>
+        <div class="payments-summary">
+          <div class="pay-card">
+            <div class="stat-lbl">Этот месяц</div>
+            <div class="stat-val mag" id="payMonth">0 ₽</div>
+            <div class="stat-sub" id="payMonthPeriod">—</div>
+          </div>
+          <div class="pay-card">
+            <div class="stat-lbl">Прошлый месяц</div>
+            <div class="stat-val" id="payPrev">—</div>
+            <div class="stat-sub">Предыдущий период</div>
+          </div>
+          <div class="pay-card">
+            <div class="stat-lbl">За всё время</div>
+            <div class="stat-val" id="payAll">0 ₽</div>
+            <div class="stat-sub">Накопленная комиссия</div>
+          </div>
+        </div>
+
+        <!-- Payments history table -->
+        <div class="sec-title">История по абонентам</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Номер SIM</th>
+                <th>Период</th>
+                <th>Выплата за период</th>
+                <th>Сумма нарастающим</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: LINK -->
+      <div id="tab-link" style="display:none">
+        <div class="sec-title">Моя реферальная ссылка</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:28px;margin-bottom:16px">
+          <div style="font-size:.78rem;color:var(--g40);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Ваша уникальная ссылка</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+              padding:12px 16px;font-family:var(--fh);font-size:.82rem;color:var(--mag);
+              flex:1;min-width:200px;word-break:break-all" id="myLink">—</div>
+            <button class="btn btn-mag btn-sm" onclick="copyLink()">📋 Копировать</button>
+          </div>
+          <p style="font-size:.75rem;color:var(--g60);margin-top:12px;line-height:1.5">
+            Разместите эту ссылку в описании видео, в stories и в закрепе.<br/>
+            Все заказы по этой ссылке будут записаны на вас.
+          </p>
+        </div>
+
+        <div style="background:rgba(255,52,149,.07);border:1px solid rgba(255,52,149,.2);border-radius:var(--r2);padding:20px">
+          <div style="font-weight:700;color:var(--mag);margin-bottom:8px">Как это работает</div>
+          <div style="font-size:.82rem;color:var(--g40);line-height:1.7">
+            1. Клиент переходит по вашей ссылке на сайт<br/>
+            2. Оформляет заказ на сим-карту<br/>
+            3. Получает сим-карту и активирует её<br/>
+            4. Вы получаете комиссию каждый месяц пока абонент пользуется тарифом
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: ADMIN PANEL
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-admin">
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-box">t2</div>
+      <div>
+        <div class="nav-logo-name"><span class="m">ПРО100</span>СИМка</div>
+        <div class="nav-logo-sub">Панель администратора</div>
+      </div>
+    </div>
+    <div class="nav-r">
+      <div class="nav-user"><span class="nav-user-dot"></span>Администратор</div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-menu">
+        <div class="smenu-item active" onclick="showAdminTab('upload')">
+          <span class="sico">📤</span> Загрузить отчёт
+        </div>
+        <div class="smenu-item" onclick="showAdminTab('bloggers')">
+          <span class="sico">👥</span> Блогеры
+        </div>
+        <div class="smenu-item" onclick="showAdminTab('all-orders')">
+          <span class="sico">📦</span> Все заказы
+        </div>
+        <div class="smenu-item" onclick="showAdminTab('stats')">
+          <span class="sico">📊</span> Статистика
+        </div>
+        <div class="sidebar-sep"></div>
+        <div class="smenu-item" onclick="doLogout()" style="color:var(--g60)">
+          <span class="sico">🚪</span> Выйти
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- ADMIN TAB: UPLOAD -->
+      <div id="atab-upload">
+        <div class="sec-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span>Загрузить отчёт T2 <span class="sec-title-sub">Excel файл от T2</span></span>
+          <button class="btn btn-ghost btn-sm" onclick="syncOrdersFromSheets()">🔄 Синхронизировать заказы</button>
+        </div>
+        <div style="background:rgba(255,52,149,.07);border:1px solid rgba(255,52,149,.2);border-radius:var(--r);padding:10px 14px;font-size:.78rem;color:var(--g40);margin-bottom:16px">
+          Нажмите «Синхронизировать заказы» чтобы загрузить новые заказы с лендинга из Google Sheets. Затем загрузите отчёт T2 для расчёта комиссий.
+        </div>
+
+        <div class="upload-area" id="uploadArea"
+          onclick="document.getElementById('fileInput').click()"
+          ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+          <span class="upload-ico">📊</span>
+          <div class="upload-title">Нажмите или перетащите файл</div>
+          <div class="upload-sub">Поддерживается .xlsx файл от T2 (ИП_ШЕПЕЛЕВ_А_Н__B2B_Agents_details_...)</div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])"/>
+
+        <div class="upload-progress" id="uploadProgress">
+          <div class="upload-progress-bar" id="uploadProgressBar" style="width:0%"></div>
+        </div>
+
+        <div class="upload-result" id="uploadResult">
+          <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--r2);padding:20px;margin-bottom:16px">
+            <div style="font-weight:700;color:#22c55e;margin-bottom:10px">✅ Отчёт успешно загружен</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="uploadStats"></div>
+          </div>
+          <div class="sec-title" style="margin-top:16px">Предпросмотр данных</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Номер SIM</th>
+                  <th>Дата активации</th>
+                  <th>За пред. периоды</th>
+                  <th>За этот период</th>
+                  <th>Блогер</th>
+                </tr>
+              </thead>
+              <tbody id="previewTable"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-mag" onclick="saveReport()" style="margin-top:12px">
+            💾 Сохранить и обновить данные блогеров
+          </button>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB: BLOGGERS -->
+      <div id="atab-bloggers" style="display:none">
+        <div class="sec-title">Управление блогерами</div>
+
+        <!-- Add form -->
+        <div class="add-blogger-form">
+          <div style="font-weight:700;font-size:.88rem;margin-bottom:14px;color:var(--g20)">Добавить блогера</div>
+          <div class="form-row">
+            <div>
+              <label class="fl">Имя / Псевдоним</label>
+              <input class="fi" type="text" id="newName" placeholder="Иван Технолог" style="margin-bottom:0"/>
+            </div>
+            <div>
+              <label class="fl">Логин (ref-метка)</label>
+              <input class="fi" type="text" id="newLogin" placeholder="ivan_tech" style="margin-bottom:0"/>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:12px">
+            <div>
+              <label class="fl">Пароль</label>
+              <input class="fi" type="text" id="newPass" placeholder="Минимум 6 символов" style="margin-bottom:0"/>
+            </div>
+            <div>
+              <label class="fl">Email (для связи)</label>
+              <input class="fi" type="email" id="newEmail" placeholder="blogger@mail.ru" style="margin-bottom:0"/>
+            </div>
+          </div>
+          <button class="btn btn-mag btn-sm" style="margin-top:14px" onclick="addBlogger()">
+            + Добавить блогера
+          </button>
+        </div>
+
+        <!-- List -->
+        <div class="blogger-list" id="bloggerList"></div>
+      </div>
+
+      <!-- ADMIN TAB: ALL ORDERS -->
+      <div id="atab-all-orders" style="display:none">
+        <div class="sec-title">Все заказы и привязки</div>
+        <div class="table-wrap">
+          <div class="table-head">
+            <div class="sec-title" style="margin-bottom:0;font-size:.85rem">Заказы с лендинга</div>
+            <input class="table-search" type="text" placeholder="Поиск..." oninput="filterOrders(this.value)"/>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>ФИО клиента</th>
+                <th>Телефон</th>
+                <th>Тариф</th>
+                <th>Блогер</th>
+                <th>Номер SIM</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="allOrdersTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB: STATS -->
+      <div id="atab-stats" style="display:none">
+        <div class="sec-title">Сводная статистика</div>
+        <div class="stats-grid" style="margin-bottom:24px">
+          <div class="stat-card accent">
+            <div class="stat-lbl">Всего блогеров</div>
+            <div class="stat-val mag" id="totalBloggers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Всего абонентов</div>
+            <div class="stat-val" id="totalSubs">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Выплат за месяц</div>
+            <div class="stat-val" id="totalMonth">0 ₽</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Выплат за всё время</div>
+            <div class="stat-val" id="totalAll">0 ₽</div>
+          </div>
+        </div>
+        <div class="sec-title">Топ блогеров по выплатам</div>
+        <div class="blogger-list" id="topBloggers"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════
+// ДАННЫЕ (LocalStorage как временное хранилище)
+// В продакшене заменить на Supabase API
+// ═══════════════════════════════════════════
+
+// ─── НАЧАЛЬНЫЕ ДАННЫЕ ───────────────────────
+// Администратор — логин: admin, пароль: admin123
+// Блогеры добавляются через панель администратора
+
+const ADMIN_LOGIN = 'admin';
+const ADMIN_PASS  = 'admin123';
+// ВАЖНО: в продакшене заменить на хэширование паролей через bcrypt
+// и хранение в Supabase, а не в LocalStorage
+
+// ─── УТИЛИТЫ ХРАНЕНИЯ ───────────────────────
+function getData(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || null; } catch { return null; }
+}
+function setData(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+// ─── ИНИЦИАЛИЗАЦИЯ ──────────────────────────
+function initStorage() {
+  if (!getData('bloggers')) {
+    setData('bloggers', [
+      // Демо-блогер для теста
+      { id: 'demo', login: 'demo', pass: 'demo123', name: 'Демо Блогер',
+        email: 'demo@example.com', ref: 'demo', createdAt: new Date().toISOString() }
+    ]);
+  }
+  if (!getData('orders')) setData('orders', []);
+  if (!getData('report')) setData('report', null);
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+let currentUser = null;
+let currentRole = null; // 'admin' | 'blogger'
+
+function doLogin() {
+  const login = document.getElementById('loginInput').value.trim();
+  const pass  = document.getElementById('passInput').value;
+  const err   = document.getElementById('loginErr');
+  err.classList.remove('show');
+
+  if (!login || !pass) {
+    err.textContent = 'Заполните все поля';
+    err.classList.add('show'); return;
+  }
+
+  // Проверка администратора
+  if (login === ADMIN_LOGIN && pass === ADMIN_PASS) {
+    currentUser = { login: 'admin', name: 'Администратор' };
+    currentRole = 'admin';
+    showPage('admin');
+    loadAdminData();
+    return;
+  }
+
+  // Проверка блогера
+  const bloggers = getData('bloggers') || [];
+  const blogger  = bloggers.find(b => b.login === login && b.pass === pass);
+  if (blogger) {
+    currentUser = blogger;
+    currentRole = 'blogger';
+    showPage('dashboard');
+    loadDashboard(blogger);
+    return;
+  }
+
+  err.textContent = 'Неверный логин или пароль';
+  err.classList.add('show');
+}
+
+function doLogout() {
+  currentUser = null;
+  currentRole = null;
+  document.getElementById('loginInput').value = '';
+  document.getElementById('passInput').value = '';
+  document.getElementById('loginErr').classList.remove('show');
+  showPage('login');
+}
+
+// Enter на форме входа
+document.getElementById('passInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('loginInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passInput').focus();
+});
+
+// ═══════════════════════════════════════════
+// НАВИГАЦИЯ СТРАНИЦ
+// ═══════════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+}
+
+function showTab(tab) {
+  ['overview','subscribers','payments','link'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('#page-dashboard .smenu-item').forEach((el, i) => {
+    const tabs = ['overview','subscribers','payments','link'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+}
+
+function showAdminTab(tab) {
+  ['upload','bloggers','all-orders','stats'].forEach(t => {
+    document.getElementById('atab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('#page-admin .smenu-item').forEach((el, i) => {
+    const tabs = ['upload','bloggers','all-orders','stats'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+  if (tab === 'bloggers')   renderBloggerList();
+  if (tab === 'all-orders') renderAllOrders();
+  if (tab === 'stats')      renderAdminStats();
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD — ЗАГРУЗКА ДАННЫХ БЛОГЕРА
+// ═══════════════════════════════════════════
+function loadDashboard(blogger) {
+  document.getElementById('navBloggerName').textContent  = blogger.name;
+  document.getElementById('dashGreeting').textContent   = blogger.name;
+  document.getElementById('myLink').textContent = `https://pro100simka.ru/?ref=${blogger.ref || blogger.login}`;
+
+  const now = new Date();
+  document.getElementById('dashPeriod').textContent =
+    now.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+
+  // Получаем данные из отчёта T2 для этого блогера
+  const report = getData('report') || { rows: [] };
+  const orders = (getData('orders') || []).filter(o => o.blogger === blogger.ref || o.blogger === blogger.login);
+
+  // Находим SIM-номера этого блогера из заказов
+  const mySimNums = orders.map(o => o.simNumber).filter(Boolean);
+
+  // Фильтруем строки отчёта по номерам
+  const myRows = report.rows
+    ? report.rows.filter(r => mySimNums.includes(r.msisdn))
+    : [];
+
+  // Считаем метрики
+  const monthTotal = myRows.reduce((s, r) => s + (r.periodAmount || 0), 0);
+  const prevTotal  = myRows.reduce((s, r) => s + (r.prevAmount || 0), 0);
+  const allTotal   = monthTotal + prevTotal;
+
+  document.getElementById('statMonth').textContent = fmt(monthTotal);
+  document.getElementById('statTotal').textContent = fmt(allTotal);
+  document.getElementById('statSubs').textContent  = myRows.length || orders.length;
+  document.getElementById('statSubsBadge').textContent = `↑ ${orders.length} заказов`;
+
+  // Таблица последних подключений
+  renderRecentTable(myRows, orders);
+
+  // Таблица абонентов
+  renderSubsTable(myRows, orders, blogger);
+
+  // Таблица выплат
+  renderPaymentsTable(myRows);
+  document.getElementById('payMonth').textContent = fmt(monthTotal);
+  document.getElementById('payAll').textContent   = fmt(allTotal);
+
+  const report2 = getData('report');
+  document.getElementById('payMonthPeriod').textContent =
+    report2 ? `Период: ${report2.period || 'не указан'}` : '—';
+
+  // График
+  renderChart(myRows);
+}
+
+function fmt(n) {
+  return (Math.round(n * 100) / 100).toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₽';
+}
+
+function fmtDate(serial) {
+  if (!serial) return '—';
+  if (typeof serial === 'string') return serial;
+  // Excel serial date
+  const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+  return d.toLocaleDateString('ru-RU');
+}
+
+function renderRecentTable(rows, orders) {
+  const tbody = document.getElementById('recentTable');
+  const data = rows.length ? rows : orders.slice(0,5);
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty">
+      <span class="empty-ico">📭</span>
+      <div class="empty-t">Нет данных</div>
+      <div class="empty-s">Появятся после загрузки отчёта T2</div>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.slice(0,10).map(r => `
+    <tr>
+      <td class="td-num">${r.msisdn || '—'}</td>
+      <td class="td-gray">${fmtDate(r.activationDate)}</td>
+      <td>${r.tariff || '—'}</td>
+      <td class="td-mag">${fmt(r.periodAmount || 0)}</td>
+      <td><span class="status-badge s-active">Активен</span></td>
+    </tr>`).join('') ||
+    orders.slice(0,5).map(o => `
+    <tr>
+      <td class="td-num">${o.simNumber || 'не присвоен'}</td>
+      <td class="td-gray">${new Date(o.timestamp||Date.now()).toLocaleDateString('ru-RU')}</td>
+      <td>${o.plan || '—'}</td>
+      <td class="td-gray">—</td>
+      <td><span class="status-badge s-new">Новый</span></td>
+    </tr>`).join('');
+}
+
+function renderSubsTable(rows, orders, blogger) {
+  document.getElementById('subsCount').textContent = `— ${rows.length || orders.length} абонентов`;
+  const tbody = document.getElementById('subsTable');
+  if (!rows.length && !orders.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty">
+      <span class="empty-ico">📱</span>
+      <div class="empty-t">Нет абонентов</div>
+      <div class="empty-s">Абоненты появятся после загрузки отчёта T2</div>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="td-num">${r.msisdn}</td>
+      <td class="td-gray">${fmtDate(r.activationDate)}</td>
+      <td>${fmt(r.prevAmount || 0)}</td>
+      <td class="td-mag">${fmt(r.periodAmount || 0)}</td>
+      <td class="td-green">${fmt((r.prevAmount||0)+(r.periodAmount||0))}</td>
+      <td><span class="status-badge s-active">Активен</span></td>
+    </tr>`).join('');
+  window._subsRows = rows;
+}
+
+function filterSubs(q) {
+  const rows = (window._subsRows || []).filter(r =>
+    r.msisdn && r.msisdn.includes(q.replace(/\D/g,''))
+  );
+  renderSubsTable(rows, [], currentUser);
+}
+
+function renderPaymentsTable(rows) {
+  const tbody = document.getElementById('paymentsTable');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty">
+      <span class="empty-ico">💰</span>
+      <div class="empty-t">Нет данных о выплатах</div>
+      <div class="empty-s">Данные появятся после загрузки отчёта T2</div>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="td-num">${r.msisdn}</td>
+      <td class="td-gray">${r.period || '—'}</td>
+      <td class="td-mag">${fmt(r.periodAmount||0)}</td>
+      <td>${fmt((r.prevAmount||0)+(r.periodAmount||0))}</td>
+    </tr>`).join('');
+}
+
+function renderChart(rows) {
+  const bars  = document.getElementById('chartBars');
+  const months = document.getElementById('chartMonths');
+  // Фейковые данные для демонстрации динамики (в продакшене — реальные из БД)
+  const monthNames = ['Нояб','Дек','Янв','Февр','Март','Апр'];
+  const now = new Date();
+  const currentMonth = rows.reduce((s, r) => s + (r.periodAmount||0), 0);
+  const data = [
+    currentMonth * 0.6, currentMonth * 0.72, currentMonth * 0.8,
+    currentMonth * 0.91, currentMonth * 0.95, currentMonth
+  ];
+  const max = Math.max(...data) || 1;
+  bars.innerHTML  = data.map((v, i) => `
+    <div class="chart-bar-col">
+      <div class="chart-bar" style="height:${Math.round(v/max*100)}%" title="${fmt(v)}">
+        <span class="chart-bar-val">${v > 0 ? Math.round(v) + '₽' : ''}</span>
+      </div>
+    </div>`).join('');
+  months.innerHTML = monthNames.map(m =>
+    `<div class="chart-month" style="flex:1;text-align:center">${m}</div>`).join('');
+}
+
+function copyLink() {
+  const link = document.getElementById('myLink').textContent;
+  navigator.clipboard.writeText(link).then(() => showToast('Ссылка скопирована!','success'));
+}
+
+// ═══════════════════════════════════════════
+// ADMIN — ЗАГРУЗКА ОТЧЁТА T2
+// ═══════════════════════════════════════════
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.add('drag');
+}
+function handleDragLeave(e) {
+  document.getElementById('uploadArea').classList.remove('drag');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+}
+
+let parsedReportData = null;
+
+function handleFile(file) {
+  if (!file || !file.name.match(/\.xlsx?$/i)) {
+    showToast('Загрузите файл .xlsx','error'); return;
+  }
+  const prog = document.getElementById('uploadProgress');
+  const bar  = document.getElementById('uploadProgressBar');
+  prog.style.display = 'block';
+  bar.style.width = '0%';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    bar.style.width = '50%';
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      bar.style.width = '80%';
+
+      // Парсим структуру отчёта T2
+      // Колонки по позиции (0-based):
+      // 0: Тип выплаты, 1: Отчетный период, 9: MSISDN (на момент активации)
+      // 10: MSISDN текущий, 12: Дата активации, 16: Сумма за предыдущие периоды
+      // 19: Сумма за отчетный период
+
+      const header = raw[0];
+      if (!header) { showToast('Файл не содержит данных','error'); return; }
+
+      // Находим нужные колонки по заголовкам
+      const COL = {
+        payType:   header.findIndex(h => String(h).includes('Тип выплаты')),
+        period:    header.findIndex(h => String(h).includes('Отчетный период')),
+        msisdn:    header.findIndex(h => String(h).includes('MSISDN текущий')),
+        msisdnAct: header.findIndex(h => String(h).includes('MSISDN на момент')),
+        actDate:   header.findIndex(h => String(h).includes('Дата активации')),
+        prevAmt:   header.findIndex(h => String(h).includes('предыдущих периодах')),
+        periodAmt: header.findIndex(h => String(h).includes('за отчетный период, руб')),
+        client:    header.findIndex(h => String(h).includes('Наименование Клиента')),
+      };
+
+      // Fallback по позиции если заголовки не найдены
+      if (COL.msisdn < 0) COL.msisdn = 10;
+      if (COL.msisdnAct < 0) COL.msisdnAct = 9;
+      if (COL.actDate < 0) COL.actDate = 12;
+      if (COL.prevAmt < 0) COL.prevAmt = 16;
+      if (COL.periodAmt < 0) COL.periodAmt = 19;
+      if (COL.client < 0) COL.client = 8;
+      if (COL.period < 0) COL.period = 1;
+
+      const rows = raw.slice(1).filter(r => r[COL.payType] === 'Выплата').map(r => ({
+        msisdn:       String(r[COL.msisdn] || r[COL.msisdnAct] || '').trim(),
+        msisdnAct:    String(r[COL.msisdnAct] || '').trim(),
+        activationDate: r[COL.actDate],
+        prevAmount:   parseFloat(r[COL.prevAmt]) || 0,
+        periodAmount: parseFloat(r[COL.periodAmt]) || 0,
+        client:       String(r[COL.client] || '').trim(),
+        period:       String(r[COL.period] || '').trim(),
+        tariff:       '—',
+      }));
+
+      const totalMonth = rows.reduce((s,r) => s + r.periodAmount, 0);
+      const totalPrev  = rows.reduce((s,r) => s + r.prevAmount, 0);
+
+      // Определяем отчётный период
+      const periodRaw = raw[1] && raw[1][COL.period];
+      const periodStr = periodRaw ? fmtExcelDate(periodRaw) : 'не определён';
+
+      parsedReportData = { rows, period: periodStr, loadedAt: new Date().toISOString() };
+
+      // Показываем статистику
+      document.getElementById('uploadStats').innerHTML = `
+        <div class="stat-card"><div class="stat-lbl">Строк в отчёте</div><div class="stat-val">${rows.length}</div></div>
+        <div class="stat-card"><div class="stat-lbl">За период</div><div class="stat-val mag">${fmt(totalMonth)}</div></div>
+        <div class="stat-card"><div class="stat-lbl">Период</div><div class="stat-val" style="font-size:1rem">${periodStr}</div></div>`;
+
+      // Предпросмотр
+      const tbody = document.getElementById('previewTable');
+      const orders = getData('orders') || [];
+      tbody.innerHTML = rows.slice(0,20).map(r => {
+        const order = orders.find(o => o.simNumber && String(o.simNumber).replace(/\D/g,'') === r.msisdn.replace(/\D/g,''));
+        return `<tr>
+          <td class="td-num">${r.msisdn}</td>
+          <td class="td-gray">${fmtDate(r.activationDate)}</td>
+          <td>${fmt(r.prevAmount)}</td>
+          <td class="td-mag">${fmt(r.periodAmount)}</td>
+          <td>${order ? `<span style="color:var(--mag);font-weight:600">${order.blogger}</span>` : '<span style="color:var(--g60)">не привязан</span>'}</td>
+        </tr>`;}).join('');
+
+      bar.style.width = '100%';
+      setTimeout(() => { prog.style.display='none'; }, 500);
+      document.getElementById('uploadResult').style.display = 'block';
+      showToast(`Загружено ${rows.length} строк`, 'success');
+
+    } catch(err) {
+      console.error(err);
+      showToast('Ошибка чтения файла: ' + err.message, 'error');
+      prog.style.display = 'none';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function fmtExcelDate(serial) {
+  if (typeof serial === 'string') return serial;
+  if (typeof serial === 'number') {
+    const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    return d.toLocaleDateString('ru-RU', {month:'long',year:'numeric'});
+  }
+  return String(serial);
+}
+
+function saveReport() {
+  if (!parsedReportData) { showToast('Нет данных для сохранения','error'); return; }
+  setData('report', parsedReportData);
+  showToast('Данные сохранены! Блогеры видят обновлённую информацию.','success');
+}
+
+// ═══════════════════════════════════════════
+// ADMIN — УПРАВЛЕНИЕ БЛОГЕРАМИ
+// ═══════════════════════════════════════════
+function addBlogger() {
+  const name  = document.getElementById('newName').value.trim();
+  const login = document.getElementById('newLogin').value.trim().toLowerCase();
+  const pass  = document.getElementById('newPass').value.trim();
+  const email = document.getElementById('newEmail').value.trim();
+  if (!name || !login || !pass) { showToast('Заполните имя, логин и пароль','error'); return; }
+  if (pass.length < 6) { showToast('Пароль минимум 6 символов','error'); return; }
+
+  const bloggers = getData('bloggers') || [];
+  if (bloggers.find(b => b.login === login)) { showToast('Такой логин уже есть','error'); return; }
+
+  bloggers.push({ id: Date.now().toString(), login, pass, name, email, ref: login, createdAt: new Date().toISOString() });
+  setData('bloggers', bloggers);
+
+  document.getElementById('newName').value = '';
+  document.getElementById('newLogin').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('newEmail').value = '';
+
+  renderBloggerList();
+  showToast(`Блогер ${name} добавлен! Логин: ${login}`, 'success');
+}
+
+function deleteBlogger(id) {
+  if (!confirm('Удалить блогера?')) return;
+  const bloggers = (getData('bloggers') || []).filter(b => b.id !== id);
+  setData('bloggers', bloggers);
+  renderBloggerList();
+  showToast('Блогер удалён','success');
+}
+
+function renderBloggerList() {
+  const bloggers = getData('bloggers') || [];
+  const orders   = getData('orders')   || [];
+  const report   = getData('report')   || { rows: [] };
+  const el = document.getElementById('bloggerList');
+
+  if (!bloggers.length) {
+    el.innerHTML = `<div class="empty"><span class="empty-ico">👤</span><div class="empty-t">Нет блогеров</div></div>`;
+    return;
+  }
+
+  el.innerHTML = bloggers.map(b => {
+    const myOrders = orders.filter(o => o.blogger === b.ref || o.blogger === b.login);
+    const mySimNums = myOrders.map(o => o.simNumber).filter(Boolean);
+    const myRows = (report.rows||[]).filter(r => mySimNums.includes(r.msisdn));
+    const monthTotal = myRows.reduce((s,r) => s + (r.periodAmount||0), 0);
+    const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `
+    <div class="blogger-row">
+      <div class="blogger-avatar">${initials}</div>
+      <div class="blogger-info">
+        <div class="blogger-name">${b.name}</div>
+        <div class="blogger-meta">
+          Логин: ${b.login} &nbsp;·&nbsp; ?ref=${b.ref}
+          ${b.email ? ` &nbsp;·&nbsp; ${b.email}` : ''}
+        </div>
+      </div>
+      <div class="blogger-stats">
+        <div class="blogger-stat">
+          <div class="blogger-stat-val">${myOrders.length}</div>
+          <div class="blogger-stat-lbl">заказов</div>
+        </div>
+        <div class="blogger-stat">
+          <div class="blogger-stat-val">${myRows.length}</div>
+          <div class="blogger-stat-lbl">абонентов</div>
+        </div>
+        <div class="blogger-stat">
+          <div class="blogger-stat-val">${Math.round(monthTotal)} ₽</div>
+          <div class="blogger-stat-lbl">в месяц</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:#ef4444;flex-shrink:0"
+        onclick="deleteBlogger('${b.id}')">Удалить</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// ADMIN — ВСЕ ЗАКАЗЫ
+// ═══════════════════════════════════════════
+function renderAllOrders(filter) {
+  let orders = getData('orders') || [];
+  if (filter) orders = orders.filter(o =>
+    JSON.stringify(o).toLowerCase().includes(filter.toLowerCase()));
+  const tbody = document.getElementById('allOrdersTable');
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty">
+      <span class="empty-ico">📦</span>
+      <div class="empty-t">Нет заказов</div>
+      <div class="empty-s">Заказы появятся когда клиенты оформят сим-карты на лендинге</div>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td class="td-gray">${o.timestamp ? new Date(o.timestamp).toLocaleDateString('ru-RU') : '—'}</td>
+      <td>${o.fam||''} ${o.im||''} ${o.otch||''}</td>
+      <td class="td-num">${o.phone||'—'}</td>
+      <td>${o.plan||'—'}</td>
+      <td style="color:var(--mag);font-weight:600">${o.blogger||'—'}</td>
+      <td class="td-num">${o.simNumber||'<span style="color:var(--g60)">не присвоен</span>'}</td>
+      <td><span class="status-badge ${o.simNumber ? 's-active' : 's-pending'}">${o.simNumber ? 'Отправлен' : 'Ожидает'}</span></td>
+    </tr>`).join('');
+}
+
+function filterOrders(q) { renderAllOrders(q); }
+
+// ═══════════════════════════════════════════
+// ADMIN — СТАТИСТИКА
+// ═══════════════════════════════════════════
+function renderAdminStats() {
+  const bloggers = getData('bloggers') || [];
+  const orders   = getData('orders')   || [];
+  const report   = getData('report')   || { rows: [] };
+  const rows     = report.rows || [];
+
+  const totalMonth = rows.reduce((s,r) => s+(r.periodAmount||0), 0);
+  const totalPrev  = rows.reduce((s,r) => s+(r.prevAmount||0), 0);
+
+  document.getElementById('totalBloggers').textContent = bloggers.length;
+  document.getElementById('totalSubs').textContent     = rows.length;
+  document.getElementById('totalMonth').textContent    = fmt(totalMonth);
+  document.getElementById('totalAll').textContent      = fmt(totalMonth + totalPrev);
+
+  // Топ блогеров
+  const topEl = document.getElementById('topBloggers');
+  const bloggersWithStats = bloggers.map(b => {
+    const myOrders  = orders.filter(o => o.blogger===b.ref||o.blogger===b.login);
+    const mySimNums = myOrders.map(o=>o.simNumber).filter(Boolean);
+    const myRows    = rows.filter(r => mySimNums.includes(r.msisdn));
+    const month     = myRows.reduce((s,r)=>s+(r.periodAmount||0),0);
+    const all       = myRows.reduce((s,r)=>s+(r.prevAmount||0)+(r.periodAmount||0),0);
+    return { ...b, subsCount: myRows.length, month, all };
+  }).sort((a,b) => b.month - a.month);
+
+  topEl.innerHTML = bloggersWithStats.map(b => {
+    const initials = b.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `
+    <div class="blogger-row">
+      <div class="blogger-avatar">${initials}</div>
+      <div class="blogger-info">
+        <div class="blogger-name">${b.name}</div>
+        <div class="blogger-meta">?ref=${b.ref} &nbsp;·&nbsp; ${b.subsCount} абонентов</div>
+      </div>
+      <div class="blogger-stats">
+        <div class="blogger-stat">
+          <div class="blogger-stat-val">${fmt(b.month)}</div>
+          <div class="blogger-stat-lbl">этот месяц</div>
+        </div>
+        <div class="blogger-stat">
+          <div class="blogger-stat-val">${fmt(b.all)}</div>
+          <div class="blogger-stat-lbl">всего</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// ADMIN — ЗАГРУЗКА ДАННЫХ
+// ═══════════════════════════════════════════
+function loadAdminData() {
+  // Подгружаем заказы из Google Sheets если есть подключение
+  // В текущей версии данные из localStorage
+  // В продакшене: fetch к Supabase API
+}
+
+// ═══════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+initStorage();
+
+// ═══════════════════════════════════════════
+// ИНТЕГРАЦИЯ С GOOGLE SHEETS
+// ═══════════════════════════════════════════
+// Для получения заказов с лендинга:
+// 1. В Google Apps Script добавьте функцию doGet(e) которая отдаёт заказы в JSON
+// 2. Раскомментируйте код ниже и вставьте URL:
+//
+// ═══════════════════════════════════════════════════
+// URL вашего Apps Script — вставьте сюда
+// ═══════════════════════════════════════════════════
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxqgjkkX2yShjD3fZQ-iMSRsRavtvnT5Q315Q5LgTpRgT7vbkovFGtfxZLddSLBkjROWg/exec';
+
+async function syncOrdersFromSheets() {
+  showToast('Синхронизация заказов...','success');
+  try {
+    const res = await fetch(SHEETS_URL + '?action=getOrders', { mode: 'no-cors' });
+    // no-cors → ответ opaque, данные читаем через workaround
+    // Используем jsonp-like подход через script tag
+    loadOrdersViaScript();
+  } catch(e) {
+    console.warn('fetch failed, trying script tag', e);
+    loadOrdersViaScript();
+  }
+}
+
+function loadOrdersViaScript() {
+  // Создаём временный script-тег для обхода CORS
+  const existing = document.getElementById('sheetsScript');
+  if (existing) existing.remove();
+  window.__sheetsCallback = function(data) {
+    if (data && data.orders) {
+      setData('orders', data.orders);
+      renderAllOrders();
+      renderBloggerList();
+      showToast('Загружено ' + data.orders.length + ' заказов', 'success');
+    }
+  };
+  const s = document.createElement('script');
+  s.id = 'sheetsScript';
+  s.src = SHEETS_URL + '?action=getOrders&callback=__sheetsCallback';
+  s.onerror = () => showToast('Не удалось получить заказы. Проверьте Apps Script.', 'error');
+  document.head.appendChild(s);
+}
+</script>
+</body>
+</html>
