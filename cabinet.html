@@ -72,14 +72,15 @@ input,select,textarea{font-family:var(--fb)}
 .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0}
 .sidebar-menu{display:flex;flex-direction:column;gap:2px;padding:0 10px}
 .smenu-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);
-  font-size:.83rem;font-weight:500;color:var(--g40);cursor:pointer;transition:background .15s,color .15s}
+  font-size:.83rem;font-weight:500;color:var(--g40);cursor:pointer;transition:background .15s,color .15s;
+  white-space:nowrap;overflow:hidden}
 .smenu-item:hover{background:var(--bg3);color:var(--white)}
 .smenu-item.active{background:rgba(255,52,149,.12);color:var(--mag);font-weight:600}
 .smenu-item .sico{font-size:1rem;flex-shrink:0}
 .sidebar-sep{height:1px;background:var(--border);margin:10px 10px}
 
 /* ═══ MAIN CONTENT ═══ */
-.main{flex:1;padding:28px 32px;overflow-y:auto}
+.main{flex:1;padding:28px 32px;overflow-y:auto;min-height:0}
 
 /* ═══ STATS GRID ═══ */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
@@ -218,7 +219,7 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
 @media(max-width:900px){
   .stats-grid{grid-template-columns:1fr 1fr}
   .sidebar{display:none}
-  .main{padding:20px 16px 90px}
+  .main{padding:20px 16px 100px}
   .form-row{grid-template-columns:1fr}
   .chart-bars{height:80px}
   table{font-size:.76rem}
@@ -296,7 +297,7 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
   </nav>
 
   <!-- MOBILE BOTTOM NAV (blogger) -->
-  <div class="mobile-nav" id="mnavBlogger">
+  <div class="mobile-nav" id="mnavBlogger" style="display:none">
     <div class="mobile-nav-inner">
       <div class="mnav-item active" id="mnav-overview" onclick="showTab('overview')">
         <div class="mico-bg"><span class="mico">📊</span></div>
@@ -518,7 +519,7 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
   </nav>
 
   <!-- MOBILE BOTTOM NAV (admin) -->
-  <div class="mobile-nav" id="mnavAdmin">
+  <div class="mobile-nav" id="mnavAdmin" style="display:none">
     <div class="mobile-nav-inner">
       <div class="mnav-item active" id="amnav-upload" onclick="showAdminTab('upload')">
         <div class="mico-bg"><span class="mico">📤</span></div>
@@ -812,11 +813,13 @@ document.getElementById('loginInput').addEventListener('keydown', e => {
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  // Показываем нужный мобильный навбар
+  window.scrollTo(0, 0);
+  // Показываем нужный мобильный навбар только на мобильных
+  const isMobile = window.innerWidth <= 768;
   const nb = document.getElementById('mnavBlogger');
   const na = document.getElementById('mnavAdmin');
-  if(nb) nb.style.display = page === 'dashboard' ? 'block' : 'none';
-  if(na) na.style.display = page === 'admin'     ? 'block' : 'none';
+  if(nb) nb.style.display = (page === 'dashboard' && isMobile) ? 'block' : (page !== 'dashboard' ? 'none' : nb.style.display);
+  if(na) na.style.display = (page === 'admin'     && isMobile) ? 'block' : (page !== 'admin'     ? 'none' : na.style.display);
 }
 
 function showTab(tab) {
@@ -1340,6 +1343,16 @@ function showToast(msg, type='success') {
 // INIT
 // ═══════════════════════════════════════════
 initStorage();
+
+// Обновляем мобильный nav при изменении размера окна
+window.addEventListener('resize', function() {
+  if (!currentRole) return;
+  const isMobile = window.innerWidth <= 768;
+  const nb = document.getElementById('mnavBlogger');
+  const na = document.getElementById('mnavAdmin');
+  if(nb) nb.style.display = (currentRole === 'blogger' && isMobile) ? 'block' : 'none';
+  if(na) na.style.display = (currentRole === 'admin'   && isMobile) ? 'block' : 'none';
+});
 
 // ═══════════════════════════════════════════
 // ИНТЕГРАЦИЯ С GOOGLE SHEETS
