@@ -705,7 +705,7 @@ function doLogin() {
     currentUser = { login: 'admin', name: 'Администратор' };
     currentRole = 'admin';
     showPage('admin');
-    loadAdminData();
+    try { loadAdminData(); } catch(e) { console.warn('loadAdminData error:', e); }
     return;
   }
 
@@ -716,7 +716,7 @@ function doLogin() {
     currentUser = blogger;
     currentRole = 'blogger';
     showPage('dashboard');
-    loadDashboard(blogger);
+    try { loadDashboard(blogger); } catch(e) { console.warn('loadDashboard error:', e); }
     return;
   }
 
@@ -761,50 +761,47 @@ function showTab(tab) {
 
 function showAdminTab(tab) {
   ['upload','bloggers','all-orders','stats'].forEach(t => {
-    document.getElementById('atab-' + t).style.display = t === tab ? 'block' : 'none';
+    const el = document.getElementById('atab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
   });
   document.querySelectorAll('#page-admin .smenu-item').forEach((el, i) => {
     const tabs = ['upload','bloggers','all-orders','stats'];
     el.classList.toggle('active', tabs[i] === tab);
   });
-  if (tab === 'bloggers')   renderBloggerList();
-  if (tab === 'all-orders') renderAllOrders();
-  if (tab === 'stats')      renderAdminStats();
+  try {
+    if (tab === 'bloggers')   renderBloggerList();
+    if (tab === 'all-orders') renderAllOrders();
+    if (tab === 'stats')      renderAdminStats();
+  } catch(e) { console.warn('showAdminTab error:', e); }
 }
 
 // ═══════════════════════════════════════════
 // DASHBOARD — ЗАГРУЗКА ДАННЫХ БЛОГЕРА
 // ═══════════════════════════════════════════
 function loadDashboard(blogger) {
-  document.getElementById('navBloggerName').textContent  = blogger.name;
-  document.getElementById('dashGreeting').textContent   = blogger.name;
-  document.getElementById('myLink').textContent = `https://pro100simka.ru/?ref=${blogger.ref || blogger.login}`;
+  const setEl = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+
+  setEl('navBloggerName', blogger.name);
+  setEl('dashGreeting',   blogger.name);
+  const linkEl = document.getElementById('myLink');
+  if (linkEl) linkEl.textContent = 'https://pro100simka.ru/?ref=' + (blogger.ref || blogger.login);
 
   const now = new Date();
-  document.getElementById('dashPeriod').textContent =
-    now.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+  setEl('dashPeriod', now.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }));
 
-  // Получаем данные из отчёта T2 для этого блогера
   const report = getData('report') || { rows: [] };
   const orders = (getData('orders') || []).filter(o => o.blogger === blogger.ref || o.blogger === blogger.login);
-
-  // Находим SIM-номера этого блогера из заказов
   const mySimNums = orders.map(o => o.simNumber).filter(Boolean);
+  const myRows = (report.rows || []).filter(r => mySimNums.includes(r.msisdn));
 
-  // Фильтруем строки отчёта по номерам
-  const myRows = report.rows
-    ? report.rows.filter(r => mySimNums.includes(r.msisdn))
-    : [];
-
-  // Считаем метрики
   const monthTotal = myRows.reduce((s, r) => s + (r.periodAmount || 0), 0);
   const prevTotal  = myRows.reduce((s, r) => s + (r.prevAmount || 0), 0);
   const allTotal   = monthTotal + prevTotal;
 
-  document.getElementById('statMonth').textContent = fmt(monthTotal);
-  document.getElementById('statTotal').textContent = fmt(allTotal);
-  document.getElementById('statSubs').textContent  = myRows.length || orders.length;
-  document.getElementById('statSubsBadge').textContent = `↑ ${orders.length} заказов`;
+  setEl('statMonth', fmt(monthTotal));
+  setEl('statTotal', fmt(allTotal));
+  setEl('statSubs',  String(myRows.length || orders.length));
+  setEl('statSubsBadge', '↑ ' + orders.length + ' заказов');
 
   // Таблица последних подключений
   renderRecentTable(myRows, orders);
@@ -1309,35 +1306,35 @@ function loadOrdersViaIframe() {
 }
 
 function showManualSync() {
-  // Открываем URL скрипта в новой вкладке — пользователь копирует JSON и вставляет
   const url = SHEETS_URL + '?action=getOrders';
-
-  // Показываем диалог
   const modal = document.createElement('div');
   modal.id = 'syncModal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-  modal.innerHTML = \`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:520px;width:100%">
-      <h3 style="font-family:var(--fh);font-size:1rem;text-transform:uppercase;margin-bottom:8px">Синхронизация заказов</h3>
-      <p style="font-size:.82rem;color:var(--g40);margin-bottom:16px;line-height:1.6">
-        Из-за ограничений браузера данные нужно скопировать вручную.<br/>
-        1. Нажмите кнопку ниже — откроется страница с данными<br/>
-        2. Скопируйте весь текст (Ctrl+A → Ctrl+C)<br/>
-        3. Вставьте сюда и нажмите «Импортировать»
-      </p>
-      <a href="\${url}" target="_blank" class="btn btn-ghost btn-sm" style="margin-bottom:14px;display:inline-flex">
-        🔗 Открыть данные в новой вкладке
-      </a>
-      <textarea id="syncJson" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
-        padding:12px;color:var(--white);font-family:var(--font-mono,'monospace');font-size:.75rem;
-        height:120px;outline:none;resize:vertical;margin-bottom:12px"
-        placeholder='Вставьте JSON сюда...'></textarea>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-mag" onclick="importJson()">📥 Импортировать</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('syncModal').remove()">Отмена</button>
-      </div>
-    </div>\`;
+  const box = document.createElement('div');
+  box.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:520px;width:100%';
+  box.innerHTML =
+    '<h3 style="font-family:var(--fh);font-size:1rem;text-transform:uppercase;margin-bottom:8px">Синхронизация заказов</h3>' +
+    '<p style="font-size:.82rem;color:var(--g40);margin-bottom:16px;line-height:1.6">' +
+    'Из-за ограничений браузера данные нужно скопировать вручную.<br/>' +
+    '1. Нажмите кнопку ниже — откроется страница с данными<br/>' +
+    '2. Скопируйте весь текст (Ctrl+A, затем Ctrl+C)<br/>' +
+    '3. Вставьте сюда и нажмите Импортировать</p>' +
+    '<a href="' + url + '" target="_blank" class="btn btn-ghost btn-sm" style="margin-bottom:14px;display:inline-flex">' +
+    '🔗 Открыть данные в новой вкладке</a><br/>' +
+    '<textarea id="syncJson" style="width:100%;background:var(--bg3);border:1px solid var(--border);' +
+    'border-radius:10px;padding:12px;color:#fff;font-size:.75rem;height:120px;outline:none;' +
+    'resize:vertical;margin:10px 0;display:block" placeholder="Вставьте JSON сюда..."></textarea>' +
+    '<div style="display:flex;gap:10px">' +
+    '<button class="btn btn-mag" onclick="importJson()">📥 Импортировать</button>' +
+    '<button class="btn btn-ghost" onclick="closeSyncModal()">Отмена</button>' +
+    '</div>';
+  modal.appendChild(box);
   document.body.appendChild(modal);
+}
+
+function closeSyncModal() {
+  var m = document.getElementById('syncModal');
+  if (m) m.remove();
 }
 
 function importJson() {
@@ -1348,7 +1345,7 @@ function importJson() {
       setData('orders', data.orders);
       renderAllOrders();
       renderBloggerList();
-      document.getElementById('syncModal').remove();
+      closeSyncModal();
       showToast('Импортировано ' + data.orders.length + ' заказов!', 'success');
     } else {
       showToast('Неверный формат данных', 'error');
