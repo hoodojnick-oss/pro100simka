@@ -296,32 +296,6 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
     </div>
   </nav>
 
-  <!-- MOBILE BOTTOM NAV (blogger) -->
-  <div class="mobile-nav" id="mnavBlogger" style="display:none">
-    <div class="mobile-nav-inner">
-      <div class="mnav-item active" id="mnav-overview" onclick="showTab('overview')">
-        <div class="mico-bg"><span class="mico">📊</span></div>
-        <span>Обзор</span>
-      </div>
-      <div class="mnav-item" id="mnav-subscribers" onclick="showTab('subscribers')">
-        <div class="mico-bg"><span class="mico">📱</span></div>
-        <span>Абоненты</span>
-      </div>
-      <div class="mnav-item" id="mnav-payments" onclick="showTab('payments')">
-        <div class="mico-bg"><span class="mico">💰</span></div>
-        <span>Выплаты</span>
-      </div>
-      <div class="mnav-item" id="mnav-link" onclick="showTab('link')">
-        <div class="mico-bg"><span class="mico">🔗</span></div>
-        <span>Ссылка</span>
-      </div>
-      <div class="mnav-item" onclick="doLogout()">
-        <div class="mico-bg"><span class="mico">🚪</span></div>
-        <span>Выйти</span>
-      </div>
-    </div>
-  </div>
-
   <div class="layout">
     <!-- Sidebar -->
     <div class="sidebar">
@@ -518,32 +492,6 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
     </div>
   </nav>
 
-  <!-- MOBILE BOTTOM NAV (admin) -->
-  <div class="mobile-nav" id="mnavAdmin" style="display:none">
-    <div class="mobile-nav-inner">
-      <div class="mnav-item active" id="amnav-upload" onclick="showAdminTab('upload')">
-        <div class="mico-bg"><span class="mico">📤</span></div>
-        <span>Отчёт</span>
-      </div>
-      <div class="mnav-item" id="amnav-bloggers" onclick="showAdminTab('bloggers')">
-        <div class="mico-bg"><span class="mico">👥</span></div>
-        <span>Блогеры</span>
-      </div>
-      <div class="mnav-item" id="amnav-all-orders" onclick="showAdminTab('all-orders')">
-        <div class="mico-bg"><span class="mico">📦</span></div>
-        <span>Заказы</span>
-      </div>
-      <div class="mnav-item" id="amnav-stats" onclick="showAdminTab('stats')">
-        <div class="mico-bg"><span class="mico">📊</span></div>
-        <span>Статистика</span>
-      </div>
-      <div class="mnav-item" onclick="doLogout()">
-        <div class="mico-bg"><span class="mico">🚪</span></div>
-        <span>Выйти</span>
-      </div>
-    </div>
-  </div>
-
   <div class="layout">
     <div class="sidebar">
       <div class="sidebar-menu">
@@ -706,6 +654,7 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
     </div>
   </div>
 </div>
+
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -1449,5 +1398,26 @@ function importJson() {
   }
 }
 </script>
+
+<!-- MOBILE NAV — position:fixed, вне страниц -->
+<div class="mobile-nav" id="mnavBlogger" style="display:none">
+  <div class="mobile-nav-inner">
+    <div class="mnav-item active" id="mnav-overview" onclick="showTab('overview')"><div class="mico-bg"><span class="mico">📊</span></div><span>Обзор</span></div>
+    <div class="mnav-item" id="mnav-subscribers" onclick="showTab('subscribers')"><div class="mico-bg"><span class="mico">📱</span></div><span>Абоненты</span></div>
+    <div class="mnav-item" id="mnav-payments" onclick="showTab('payments')"><div class="mico-bg"><span class="mico">💰</span></div><span>Выплаты</span></div>
+    <div class="mnav-item" id="mnav-link" onclick="showTab('link')"><div class="mico-bg"><span class="mico">🔗</span></div><span>Ссылка</span></div>
+    <div class="mnav-item" onclick="doLogout()"><div class="mico-bg"><span class="mico">🚪</span></div><span>Выйти</span></div>
+  </div>
+</div>
+
+<div class="mobile-nav" id="mnavAdmin" style="display:none">
+  <div class="mobile-nav-inner">
+    <div class="mnav-item active" id="amnav-upload" onclick="showAdminTab('upload')"><div class="mico-bg"><span class="mico">📤</span></div><span>Отчёт</span></div>
+    <div class="mnav-item" id="amnav-bloggers" onclick="showAdminTab('bloggers')"><div class="mico-bg"><span class="mico">👥</span></div><span>Блогеры</span></div>
+    <div class="mnav-item" id="amnav-all-orders" onclick="showAdminTab('all-orders')"><div class="mico-bg"><span class="mico">📦</span></div><span>Заказы</span></div>
+    <div class="mnav-item" id="amnav-stats" onclick="showAdminTab('stats')"><div class="mico-bg"><span class="mico">📊</span></div><span>Статистика</span></div>
+    <div class="mnav-item" onclick="doLogout()"><div class="mico-bg"><span class="mico">🚪</span></div><span>Выйти</span></div>
+  </div>
+</div>
 </body>
 </html>
