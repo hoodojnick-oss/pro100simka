@@ -218,12 +218,25 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
 @media(max-width:900px){
   .stats-grid{grid-template-columns:1fr 1fr}
   .sidebar{display:none}
-  .main{padding:20px 16px}
+  .main{padding:20px 16px 90px}
   .form-row{grid-template-columns:1fr}
+  .chart-bars{height:80px}
+  table{font-size:.76rem}
+  thead th{padding:8px 10px}
+  tbody td{padding:9px 10px}
 }
 @media(max-width:540px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .payments-summary{grid-template-columns:1fr 1fr}
+  .stat-val{font-size:1.3rem}
+  .form-row{grid-template-columns:1fr}
+  .nav{padding:10px 14px}
+  .add-blogger-form{padding:16px}
+}
+@media(max-width:380px){
   .stats-grid{grid-template-columns:1fr}
   .payments-summary{grid-template-columns:1fr}
+  .mnav-item{padding:4px 6px;min-width:44px;font-size:.58rem}
 }
 </style>
 </head>
@@ -281,6 +294,32 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
     </div>
   </nav>
+
+  <!-- MOBILE BOTTOM NAV (blogger) -->
+  <div class="mobile-nav" id="mnavBlogger">
+    <div class="mobile-nav-inner">
+      <div class="mnav-item active" id="mnav-overview" onclick="showTab('overview')">
+        <div class="mico-bg"><span class="mico">📊</span></div>
+        <span>Обзор</span>
+      </div>
+      <div class="mnav-item" id="mnav-subscribers" onclick="showTab('subscribers')">
+        <div class="mico-bg"><span class="mico">📱</span></div>
+        <span>Абоненты</span>
+      </div>
+      <div class="mnav-item" id="mnav-payments" onclick="showTab('payments')">
+        <div class="mico-bg"><span class="mico">💰</span></div>
+        <span>Выплаты</span>
+      </div>
+      <div class="mnav-item" id="mnav-link" onclick="showTab('link')">
+        <div class="mico-bg"><span class="mico">🔗</span></div>
+        <span>Ссылка</span>
+      </div>
+      <div class="mnav-item" onclick="doLogout()">
+        <div class="mico-bg"><span class="mico">🚪</span></div>
+        <span>Выйти</span>
+      </div>
+    </div>
+  </div>
 
   <div class="layout">
     <!-- Sidebar -->
@@ -477,6 +516,32 @@ tbody td{padding:11px 16px;font-size:.83rem;color:rgba(255,255,255,.85)}
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
     </div>
   </nav>
+
+  <!-- MOBILE BOTTOM NAV (admin) -->
+  <div class="mobile-nav" id="mnavAdmin">
+    <div class="mobile-nav-inner">
+      <div class="mnav-item active" id="amnav-upload" onclick="showAdminTab('upload')">
+        <div class="mico-bg"><span class="mico">📤</span></div>
+        <span>Отчёт</span>
+      </div>
+      <div class="mnav-item" id="amnav-bloggers" onclick="showAdminTab('bloggers')">
+        <div class="mico-bg"><span class="mico">👥</span></div>
+        <span>Блогеры</span>
+      </div>
+      <div class="mnav-item" id="amnav-all-orders" onclick="showAdminTab('all-orders')">
+        <div class="mico-bg"><span class="mico">📦</span></div>
+        <span>Заказы</span>
+      </div>
+      <div class="mnav-item" id="amnav-stats" onclick="showAdminTab('stats')">
+        <div class="mico-bg"><span class="mico">📊</span></div>
+        <span>Статистика</span>
+      </div>
+      <div class="mnav-item" onclick="doLogout()">
+        <div class="mico-bg"><span class="mico">🚪</span></div>
+        <span>Выйти</span>
+      </div>
+    </div>
+  </div>
 
   <div class="layout">
     <div class="sidebar">
@@ -747,15 +812,26 @@ document.getElementById('loginInput').addEventListener('keydown', e => {
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
+  // Показываем нужный мобильный навбар
+  const nb = document.getElementById('mnavBlogger');
+  const na = document.getElementById('mnavAdmin');
+  if(nb) nb.style.display = page === 'dashboard' ? 'block' : 'none';
+  if(na) na.style.display = page === 'admin'     ? 'block' : 'none';
 }
 
 function showTab(tab) {
   ['overview','subscribers','payments','link'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    const el = document.getElementById('tab-' + t);
+    if(el) el.style.display = t === tab ? 'block' : 'none';
   });
   document.querySelectorAll('#page-dashboard .smenu-item').forEach((el, i) => {
     const tabs = ['overview','subscribers','payments','link'];
     el.classList.toggle('active', tabs[i] === tab);
+  });
+  // Обновляем мобильный навбар
+  ['overview','subscribers','payments','link'].forEach(t => {
+    const el = document.getElementById('mnav-' + t);
+    if(el) el.classList.toggle('active', t === tab);
   });
 }
 
@@ -767,6 +843,11 @@ function showAdminTab(tab) {
   document.querySelectorAll('#page-admin .smenu-item').forEach((el, i) => {
     const tabs = ['upload','bloggers','all-orders','stats'];
     el.classList.toggle('active', tabs[i] === tab);
+  });
+  // Обновляем мобильный навбар
+  ['upload','bloggers','all-orders','stats'].forEach(t => {
+    const el = document.getElementById('amnav-' + t);
+    if(el) el.classList.toggle('active', t === tab);
   });
   try {
     if (tab === 'bloggers')   renderBloggerList();
