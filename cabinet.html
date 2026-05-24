@@ -1276,35 +1276,86 @@ initStorage();
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyfJrndtO26F-JYhJEqcjqRy1bq1d9jKHSB4QfMapCT2ZKGtfd6-Ze81pFl3l7MYoYtTw/exec';
 
 async function syncOrdersFromSheets() {
-  showToast('Синхронизация заказов...','success');
+  showToast('Синхронизация...', 'success');
+
+  // Метод 1: прямой fetch (работает если сайт на том же домене или CORS разрешён)
   try {
-    const res = await fetch(SHEETS_URL + '?action=getOrders', { mode: 'no-cors' });
-    // no-cors → ответ opaque, данные читаем через workaround
-    // Используем jsonp-like подход через script tag
-    loadOrdersViaScript();
-  } catch(e) {
-    console.warn('fetch failed, trying script tag', e);
-    loadOrdersViaScript();
+    const res = await fetch(SHEETS_URL + '?action=getOrders');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.orders)) {
+        setData('orders', data.orders);
+        renderAllOrders();
+        renderBloggerList();
+        showToast('Загружено ' + data.orders.length + ' заказов', 'success');
+        return;
+      }
+    }
+  } catch(e1) {
+    console.log('fetch method 1 failed:', e1.message);
   }
+
+  // Метод 2: через iframe + postMessage
+  loadOrdersViaIframe();
 }
 
-function loadOrdersViaScript() {
-  // Создаём временный script-тег для обхода CORS
-  const existing = document.getElementById('sheetsScript');
+function loadOrdersViaIframe() {
+  // Создаём скрытый iframe который загружает данные
+  const existing = document.getElementById('syncIframe');
   if (existing) existing.remove();
-  window.__sheetsCallback = function(data) {
-    if (data && data.orders) {
+
+  // Показываем модалку с инструкцией для ручного ввода URL
+  showManualSync();
+}
+
+function showManualSync() {
+  // Открываем URL скрипта в новой вкладке — пользователь копирует JSON и вставляет
+  const url = SHEETS_URL + '?action=getOrders';
+
+  // Показываем диалог
+  const modal = document.createElement('div');
+  modal.id = 'syncModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = \`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:520px;width:100%">
+      <h3 style="font-family:var(--fh);font-size:1rem;text-transform:uppercase;margin-bottom:8px">Синхронизация заказов</h3>
+      <p style="font-size:.82rem;color:var(--g40);margin-bottom:16px;line-height:1.6">
+        Из-за ограничений браузера данные нужно скопировать вручную.<br/>
+        1. Нажмите кнопку ниже — откроется страница с данными<br/>
+        2. Скопируйте весь текст (Ctrl+A → Ctrl+C)<br/>
+        3. Вставьте сюда и нажмите «Импортировать»
+      </p>
+      <a href="\${url}" target="_blank" class="btn btn-ghost btn-sm" style="margin-bottom:14px;display:inline-flex">
+        🔗 Открыть данные в новой вкладке
+      </a>
+      <textarea id="syncJson" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+        padding:12px;color:var(--white);font-family:var(--font-mono,'monospace');font-size:.75rem;
+        height:120px;outline:none;resize:vertical;margin-bottom:12px"
+        placeholder='Вставьте JSON сюда...'></textarea>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-mag" onclick="importJson()">📥 Импортировать</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('syncModal').remove()">Отмена</button>
+      </div>
+    </div>\`;
+  document.body.appendChild(modal);
+}
+
+function importJson() {
+  const raw = document.getElementById('syncJson').value.trim();
+  try {
+    const data = JSON.parse(raw);
+    if (data && Array.isArray(data.orders)) {
       setData('orders', data.orders);
       renderAllOrders();
       renderBloggerList();
-      showToast('Загружено ' + data.orders.length + ' заказов', 'success');
+      document.getElementById('syncModal').remove();
+      showToast('Импортировано ' + data.orders.length + ' заказов!', 'success');
+    } else {
+      showToast('Неверный формат данных', 'error');
     }
-  };
-  const s = document.createElement('script');
-  s.id = 'sheetsScript';
-  s.src = SHEETS_URL + '?action=getOrders&callback=__sheetsCallback';
-  s.onerror = () => showToast('Не удалось получить заказы. Проверьте Apps Script.', 'error');
-  document.head.appendChild(s);
+  } catch(e) {
+    showToast('Ошибка: ' + e.message, 'error');
+  }
 }
 </script>
 </body>
