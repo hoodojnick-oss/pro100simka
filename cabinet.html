@@ -703,7 +703,7 @@ let CUR = null; // { role, blogger }
 let DASH_DATA = null;
 let ALL_SIMS  = [];
 let ALL_ORDERS= [];
-let CFG       = {};
+let CFG       = {}; // совместимость
 
 // ══════════════════════════════════════════════════════
 // UTILS
@@ -995,7 +995,6 @@ function aTab(tab) {
   if (tab==='bloggers') loadBloggers();
   if (tab==='orders')   loadOrders();
   if (tab==='payouts')  loadPayouts();
-  if (tab==='settings') loadSettings();
   if (tab==='stats')    loadStats();
 }
 
@@ -1195,17 +1194,9 @@ function closeModal(id) {
 
 // ══════════════════════════════════════════════════════
 // ADMIN: SETTINGS
-async function loadSettings() {
-  try {
-    const res = await apiCall({ action:'getSettings' });
-    CFG = res.settings || {};
-    el('sPct').value     = CFG.commission_pct || 50;
-    el('sTaxOn').checked = CFG.tax_enabled === 'true' || CFG.tax_enabled === true;
-    el('sTaxPct').value  = CFG.tax_pct || 7;
-    el('sBonusOn').checked  = CFG.activation_bonus_enabled === 'true';
-    el('sBonusAmt').value   = CFG.activation_bonus_amount || 0;
-    updateSettingsPreview();
-  } catch(e) { toast('Ошибка загрузки настроек','err'); }
+function loadSettings() {
+  // Настройки индивидуальны для каждого блогера
+  // Изменяются через кнопку "✏️ Условия" в разделе Блогеры
 }
 
 function updateSettingsPreview() {
@@ -1241,7 +1232,7 @@ async function saveSettings() {
   try {
     await apiCall({ action:'saveSettings', ...body });
     toast('Настройки сохранены!');
-    CFG = body;
+
   } catch(e) { toast('Ошибка: '+e.message,'err'); }
 }
 
@@ -1336,10 +1327,10 @@ function onFile(file) {
       if (COL.periodAmt<0) COL.periodAmt = 19;
       if (COL.period<0)    COL.period    = 1;
 
-      // Настройки для расчёта
-      const pct    = parseFloat(CFG.commission_pct)||50;
-      const taxOn  = CFG.tax_enabled==='true';
-      const taxPct = parseFloat(CFG.tax_pct)||7;
+      // Предпросмотр расчёта (финальный расчёт делается на сервере по условиям блогера)
+      const pct    = 50;  // среднее значение для предпросмотра
+      const taxOn  = true;
+      const taxPct = 7;
 
       parsedRows = raw.slice(1).filter(r=>r[COL.payType]==='Выплата').map(r => {
         const prev   = parseFloat(r[COL.prevAmt])  ||0;
@@ -1484,8 +1475,7 @@ async function saveEditBlogger() {
 }
 
 // ══════════════════════════════════════════════════════
-// INIT
-loadSettings();
+// INIT — всё загружается по требованию
 </script>
 </body>
 </html>
