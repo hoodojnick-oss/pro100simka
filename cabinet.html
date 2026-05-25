@@ -724,33 +724,75 @@ function toast(msg, type='ok') {
 }
 
 // ══════════════════════════════════════════════════════
-// API CALL — через script tag (JSONP обход CORS)
+// API CALL — через iframe (обход CSP блокировки script-tag)
 let _cbIdx = 0;
+const _iframeContainer = document.createElement('div');
+_iframeContainer.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;bottom:0;left:0';
+document.body.appendChild(_iframeContainer);
+
 function apiCall(params) {
   return new Promise((resolve, reject) => {
     const cbName = '__cb' + (++_cbIdx);
+    const iframeId = 'ifr_' + cbName;
+
     const timeout = setTimeout(() => {
       delete window[cbName];
-      const s = el('sc_' + cbName);
-      if(s) s.remove();
+      const ifr = document.getElementById(iframeId);
+      if (ifr) ifr.remove();
       reject(new Error('Timeout'));
     }, 15000);
 
     window[cbName] = function(data) {
       clearTimeout(timeout);
       delete window[cbName];
-      const s = el('sc_' + cbName);
-      if(s) s.remove();
+      const ifr = document.getElementById(iframeId);
+      if (ifr) ifr.remove();
       resolve(data);
     };
 
     const qs = Object.entries({...params, callback: cbName})
-      .map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&');
-    const s = document.createElement('script');
-    s.id  = 'sc_' + cbName;
-    s.src = API + '?' + qs;
-    s.onerror = () => { clearTimeout(timeout); delete window[cbName]; reject(new Error('Network error')); };
-    document.head.appendChild(s);
+      .map(([k,v]) => k + '=' + encodeURIComponent(String(v))).join('&');
+
+    const ifr = document.createElement('iframe');
+    ifr.id  = iframeId;
+    ifr.src = API + '?' + qs;
+    ifr.onload = () => {
+      // iframe загрузился — пробуем прочитать контент и выполнить callback
+      try {
+        const doc = ifr.contentDocument || ifr.contentWindow?.document;
+        const text = doc?.body?.innerText || '';
+        if (text && text.includes(cbName + '(')) {
+          // Выполняем JSONP ответ
+          const fn = new Function(text);
+          fn();
+        }
+      } catch(e) {
+        // cross-origin — пробуем через postMessage или прямой fetch
+        console.warn('iframe read failed, trying fetch:', e.message);
+        fetch(API + '?' + qs)
+          .then(r => r.text())
+          .then(text => {
+            if (text.includes(cbName + '(')) {
+              const fn = new Function(text);
+              fn();
+            } else {
+              clearTimeout(timeout);
+              reject(new Error('Invalid response'));
+            }
+          })
+          .catch(err => {
+            clearTimeout(timeout);
+            delete window[cbName];
+            reject(err);
+          });
+      }
+    };
+    ifr.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      reject(new Error('Network error'));
+    };
+    _iframeContainer.appendChild(ifr);
   });
 }
 
@@ -763,6 +805,14 @@ async function apiPost(body) {
   } catch(e) {
     return { success: false, error: e.message };
   }
+}
+
+// Прямой fetch (работает если Apps Script разрешает CORS)
+async function apiFetch(params) {
+  const qs = Object.entries(params)
+    .map(([k,v]) => k + '=' + encodeURIComponent(String(v))).join('&');
+  const res = await fetch(API + '?' + qs);
+  return res.json();
 }
 
 // ══════════════════════════════════════════════════════
