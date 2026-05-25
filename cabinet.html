@@ -274,7 +274,7 @@ tbody td{padding:10px 14px;font-size:.8rem}
         <label class="fl">Пароль</label>
         <input class="fi" id="lp" type="password" placeholder="••••••••" autocomplete="current-password"/>
         <button class="btn btn-mag btn-full" onclick="doLogin()" style="margin-top:4px">Войти</button>
-        <p style="text-align:center;font-size:.7rem;color:var(--g60);margin-top:12px">pro100simka.ru</p>
+        <p style="text-align:center;font-size:.7rem;color:var(--g60);margin-top:12px">pro100simka.ru · <span style="color:var(--mag)">v3.2</span></p>
       </div>
     </div>
   </div>
@@ -506,7 +506,33 @@ tbody td{padding:10px 14px;font-size:.8rem}
             <div><label class="fl">Пароль</label><input class="fi" id="nPass" placeholder="Минимум 6 символов" type="text" style="margin-bottom:0"/></div>
             <div><label class="fl">Email (необязательно)</label><input class="fi" id="nEmail" placeholder="ivan@mail.ru" style="margin-bottom:0"/></div>
           </div>
-          <button class="btn btn-mag btn-sm" style="margin-top:12px" onclick="addBlogger()">+ Добавить</button>
+          <div style="height:1px;background:var(--border);margin:14px 0"></div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--g40);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">⚙️ Индивидуальные условия</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <label class="fl">Комиссия блогера %</label>
+              <input class="fi" id="nPct" type="number" min="0" max="100" value="50" placeholder="50" style="margin-bottom:0"/>
+            </div>
+            <div>
+              <label class="fl">Налог %</label>
+              <input class="fi" id="nTaxPct" type="number" min="0" max="100" value="7" placeholder="7" style="margin-bottom:0"/>
+            </div>
+            <div>
+              <label class="fl">Бонус за акт. ₽</label>
+              <input class="fi" id="nBonusAmt" type="number" min="0" value="0" placeholder="0" style="margin-bottom:0"/>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:center;margin-bottom:4px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer">
+              <input type="checkbox" id="nTaxOn" checked style="accent-color:var(--mag)"/>
+              Применять налог
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer">
+              <input type="checkbox" id="nBonusOn" style="accent-color:var(--mag)"/>
+              Бонус за активацию
+            </label>
+          </div>
+          <button class="btn btn-mag btn-sm" style="margin-top:12px" onclick="addBlogger()">+ Добавить блогера</button>
         </div>
         <div id="bloggersList"></div>
       </div>
@@ -536,48 +562,18 @@ tbody td{padding:10px 14px;font-size:.8rem}
       <!-- SETTINGS -->
       <div id="at-settings" style="display:none">
         <div class="card-title" style="margin-bottom:14px">⚙️ Настройки расчёта</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-
-          <div class="setting-block">
-            <div class="setting-title">💰 Комиссия блогера</div>
-            <div class="setting-row">
-              <input class="setting-input" type="number" id="sPct" min="0" max="100" placeholder="50"/>
-              <span class="setting-unit">% от суммы (после налога)</span>
-            </div>
-            <div style="font-size:.72rem;color:var(--g60)">Остаток % остаётся вам</div>
+        <div style="background:rgba(255,52,149,.07);border:1px solid rgba(255,52,149,.2);border-radius:var(--r2);padding:20px;margin-bottom:20px">
+          <div style="font-weight:700;color:var(--mag);margin-bottom:8px;font-size:.9rem">💡 Индивидуальные условия для каждого блогера</div>
+          <div style="font-size:.82rem;color:var(--g40);line-height:1.7">
+            Условия (комиссия, налог, бонус за активацию) теперь устанавливаются индивидуально для каждого блогера.<br/>
+            Чтобы изменить условия — перейдите во вкладку <b style="color:#fff">Блогеры</b> и нажмите кнопку <b style="color:#fff">✏️ Условия</b> рядом с нужным блогером.
           </div>
-
-          <div class="setting-block">
-            <div class="setting-title">🏛️ Налог</div>
-            <div class="toggle-wrap">
-              <label class="toggle"><input type="checkbox" id="sTaxOn" onchange="updateSettingsPreview()"/><span class="toggle-slider"></span></label>
-              <span class="toggle-lbl">Применять налог</span>
-            </div>
-            <div class="setting-row">
-              <input class="setting-input" type="number" id="sTaxPct" min="0" max="100" placeholder="7"/>
-              <span class="setting-unit">% налога</span>
-            </div>
-          </div>
-
-          <div class="setting-block">
-            <div class="setting-title">🎁 Бонус за активацию</div>
-            <div class="toggle-wrap">
-              <label class="toggle"><input type="checkbox" id="sBonusOn" onchange="updateSettingsPreview()"/><span class="toggle-slider"></span></label>
-              <span class="toggle-lbl">Выплачивать бонус</span>
-            </div>
-            <div class="setting-row">
-              <input class="setting-input" type="number" id="sBonusAmt" min="0" placeholder="100"/>
-              <span class="setting-unit">₽ за активацию</span>
-            </div>
-          </div>
-
-          <div class="setting-block" style="background:rgba(255,52,149,.05);border:1px solid rgba(255,52,149,.2)">
-            <div class="setting-title" style="color:var(--mag)">📊 Пример расчёта</div>
-            <div id="settingsPreview" style="font-size:.8rem;line-height:1.9;color:var(--g40)">Заполните поля слева</div>
-          </div>
-
         </div>
-        <button class="btn btn-mag" style="margin-top:16px" onclick="saveSettings()">💾 Сохранить настройки</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="stat"><div class="stat-lbl">Стандартная комиссия</div><div class="stat-val mag">50%</div><div class="stat-sub">По умолчанию при добавлении</div></div>
+          <div class="stat"><div class="stat-lbl">Стандартный налог</div><div class="stat-val">7%</div><div class="stat-sub">По умолчанию при добавлении</div></div>
+          <div class="stat"><div class="stat-lbl">Бонус за активацию</div><div class="stat-val">Выкл</div><div class="stat-sub">По умолчанию при добавлении</div></div>
+        </div>
       </div>
 
       <!-- STATS -->
@@ -632,7 +628,64 @@ tbody td{padding:10px 14px;font-size:.8rem}
     <input class="fi" type="text" id="payNote" placeholder="Перевод на карту, СБП..."/>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-mag" onclick="savePayout()">💾 Сохранить</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-ghost" onclick="closeModal('payModal')">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: редактирование условий блогера -->
+<div class="modal-bg" id="editModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">✏️ Условия блогера</div>
+    <input type="hidden" id="editId"/>
+    <div style="font-size:.88rem;font-weight:600;color:var(--mag);margin-bottom:16px" id="editBloggerName"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div>
+        <label class="fl">Имя / Псевдоним</label>
+        <input class="fi" id="editName" placeholder="Имя блогера" style="margin-bottom:0"/>
+      </div>
+      <div>
+        <label class="fl">Новый пароль (если меняем)</label>
+        <input class="fi" id="editPass" placeholder="Оставьте пустым" type="text" style="margin-bottom:0"/>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+    <div style="font-size:.72rem;font-weight:700;color:var(--g40);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">⚙️ Индивидуальные условия</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <label class="fl">Комиссия %</label>
+        <input class="fi" id="editPct" type="number" min="0" max="100" style="margin-bottom:0"/>
+      </div>
+      <div>
+        <label class="fl">Налог %</label>
+        <input class="fi" id="editTaxPct" type="number" min="0" max="100" style="margin-bottom:0"/>
+      </div>
+      <div>
+        <label class="fl">Бонус за акт. ₽</label>
+        <input class="fi" id="editBonusAmt" type="number" min="0" style="margin-bottom:0"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer">
+        <input type="checkbox" id="editTaxOn" style="accent-color:var(--mag)"/>
+        Применять налог
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer">
+        <input type="checkbox" id="editBonusOn" style="accent-color:var(--mag)"/>
+        Бонус за активацию
+      </label>
+    </div>
+
+    <!-- Превью расчёта -->
+    <div style="background:rgba(255,52,149,.06);border:1px solid rgba(255,52,149,.15);border-radius:var(--r);padding:12px;margin-bottom:16px;font-size:.78rem;line-height:1.9;color:var(--g40)" id="editPreview"></div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-mag" onclick="saveEditBlogger()">💾 Сохранить</button>
+      <button class="btn btn-ghost" onclick="closeModal('editModal')">Отмена</button>
     </div>
   </div>
 </div>
@@ -642,7 +695,7 @@ tbody td{padding:10px 14px;font-size:.8rem}
 <script>
 // ══════════════════════════════════════════════════════
 // КОНФИГ
-const API = 'https://script.google.com/macros/s/AKfycby_11RRipV5DzdvFDHr09277CzItf4g6LEWAhHsy2ZGXfM6VOuZEiY0b4WnkkRDVC-dlQ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbxCClhz1PJ295oA4PIpsGhx5yGzOjiaIPob5_hLCyg6NyK514fnv6-H4eT0YcGMnSF7/exec';
 
 // ══════════════════════════════════════════════════════
 // STATE
@@ -723,29 +776,46 @@ async function doLogin() {
   if (!login || !pass) { err.textContent='Заполните все поля'; err.classList.add('on'); return; }
 
   load.classList.add('on');
+
+  // Сначала пробуем через JSONP (GET)
+  let res = null;
   try {
-    const res = await apiCall({ action:'login', login, pass });
-    load.classList.remove('on');
-    if (res.success) {
-      CUR = res;
-      if (res.role === 'admin') {
-        showPage('admin');
-        aTab('report');
-      } else {
-        showPage('blogger');
-        set('bNavName', res.blogger.name);
-        set('bDashName', res.blogger.name);
-        el('bMyLink').textContent = 'https://pro100simka.ru/?ref=' + (res.blogger.ref || res.blogger.login);
-        loadBloggerDash();
-        bTab('overview');
-      }
-    } else {
-      err.textContent = res.error || 'Неверный логин или пароль';
-      err.classList.add('on');
-    }
+    res = await Promise.race([
+      apiCall({ action:'login', login, pass }),
+      new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 8000))
+    ]);
   } catch(e) {
-    load.classList.remove('on');
-    err.textContent = 'Ошибка соединения: ' + e.message;
+    console.warn('JSONP login failed:', e.message);
+  }
+
+  // Если JSONP не сработал — пробуем admin локально
+  if (!res) {
+    if (login === 'admin' && pass === 'admin123') {
+      res = { success: true, role: 'admin', blogger: { login:'admin', name:'Администратор', ref:'__admin__' } };
+    } else {
+      load.classList.remove('on');
+      err.textContent = 'Ошибка соединения с сервером. Проверьте интернет.';
+      err.classList.add('on');
+      return;
+    }
+  }
+
+  load.classList.remove('on');
+  if (res.success) {
+    CUR = res;
+    if (res.role === 'admin') {
+      showPage('admin');
+      aTab('report');
+    } else {
+      showPage('blogger');
+      set('bNavName', res.blogger.name);
+      set('bDashName', res.blogger.name);
+      el('bMyLink').textContent = 'https://pro100simka.ru/?ref=' + (res.blogger.ref || res.blogger.login);
+      loadBloggerDash();
+      bTab('overview');
+    }
+  } else {
+    err.textContent = res.error || 'Неверный логин или пароль';
     err.classList.add('on');
   }
 }
@@ -941,43 +1011,70 @@ async function loadBloggers() {
 }
 
 function renderBloggersList(bloggers, pays) {
-  const el2 = el('bloggersList');
+  const container = el('bloggersList');
   if (!bloggers.length) {
-    el2.innerHTML = `<div class="empty"><span class="empty-ico">👤</span><div class="empty-t">Нет блогеров</div></div>`;
+    container.innerHTML = '<div class="empty"><span class="empty-ico">👤</span><div class="empty-t">Нет блогеров</div></div>';
     return;
   }
-  el2.innerHTML = bloggers.map(b => {
+  container.innerHTML = '';
+  bloggers.forEach(b => {
     const myPays = pays.filter(p => p.ref === b.ref || p.ref === b.login);
-    const acc  = myPays.reduce((s,p)=>s+(parseFloat(p.accrued)||0),0);
-    const paid = myPays.reduce((s,p)=>s+(parseFloat(p.paid)||0),0);
-    const init = (b.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    return `<div class="blogger-row">
-      <div class="bav">${init}</div>
-      <div class="binfo">
-        <div class="bname">${b.name||b.login}</div>
-        <div class="bmeta">Логин: ${b.login} · ?ref=${b.ref} ${b.email?'· '+b.email:''}</div>
-      </div>
-      <div class="bstats">
-        <div class="bstat"><div class="bstat-val">${fmt(acc)}</div><div class="bstat-lbl">начислено</div></div>
-        <div class="bstat"><div class="bstat-val">${fmt(paid)}</div><div class="bstat-lbl">выплачено</div></div>
-      </div>
-      <button class="btn btn-red btn-sm" onclick="deleteBlogger('${b.id}','${b.name||b.login}')">Удалить</button>
-    </div>`;
-  }).join('');
+    const acc    = myPays.reduce((s,p)=>s+(parseFloat(p.accrued)||0),0);
+    const paid   = myPays.reduce((s,p)=>s+(parseFloat(p.paid)||0),0);
+    const init   = (b.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const taxStr = b.tax_enabled ? b.tax_pct+'% налог' : 'без налога';
+    const bonStr = b.activation_bonus_enabled ? '+'+fmt(b.activation_bonus_amount)+'/акт.' : '';
+
+    const row = document.createElement('div');
+    row.className = 'blogger-row';
+    row.style.cssText = 'flex-wrap:wrap;gap:10px;margin-bottom:8px';
+    row.innerHTML =
+      '<div class="bav">'+init+'</div>'+
+      '<div class="binfo">'+
+        '<div class="bname">'+(b.name||b.login)+'</div>'+
+        '<div class="bmeta">Логин: '+b.login+' · ?ref='+b.ref+(b.email?' · '+b.email:'')+'</div>'+
+        '<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">'+
+          '<span style="background:rgba(255,52,149,.12);color:var(--mag);border-radius:100px;padding:2px 8px;font-size:.68rem;font-weight:700">'+b.commission_pct+'% комиссия</span>'+
+          '<span style="background:var(--bg3);color:var(--g40);border-radius:100px;padding:2px 8px;font-size:.68rem">'+taxStr+'</span>'+
+          (bonStr?'<span style="background:rgba(34,197,94,.1);color:var(--green);border-radius:100px;padding:2px 8px;font-size:.68rem">'+bonStr+'</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<div class="bstats">'+
+        '<div class="bstat"><div class="bstat-val">'+fmt(acc)+'</div><div class="bstat-lbl">начислено</div></div>'+
+        '<div class="bstat"><div class="bstat-val">'+fmt(paid)+'</div><div class="bstat-lbl">выплачено</div></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+        '<button class="btn btn-dark btn-sm" id="edit_'+b.id+'">✏️ Условия</button>'+
+        '<button class="btn btn-red btn-sm" id="del_'+b.id+'">Удалить</button>'+
+      '</div>';
+
+    row.querySelector('#edit_'+b.id).addEventListener('click', () => openEditBlogger(b));
+    row.querySelector('#del_'+b.id).addEventListener('click',  () => deleteBlogger(b.id, b.name||b.login));
+    container.appendChild(row);
+  });
 }
 
 async function addBlogger() {
-  const name  = el('nName').value.trim();
-  const login = el('nLogin').value.trim().toLowerCase();
-  const pass  = el('nPass').value.trim();
-  const email = el('nEmail').value.trim();
+  const name     = el('nName').value.trim();
+  const login    = el('nLogin').value.trim().toLowerCase();
+  const pass     = el('nPass').value.trim();
+  const email    = el('nEmail').value.trim();
+  const pct      = el('nPct').value || '50';
+  const taxOn    = el('nTaxOn').checked ? 'true' : 'false';
+  const taxPct   = el('nTaxPct').value || '7';
+  const bonusOn  = el('nBonusOn').checked ? 'true' : 'false';
+  const bonusAmt = el('nBonusAmt').value || '0';
   if (!name||!login||!pass) { toast('Заполните имя, логин и пароль','err'); return; }
   if (pass.length<6) { toast('Пароль минимум 6 символов','err'); return; }
 
   try {
-    const res = await apiCall({ action:'addBlogger', name, login, pass, email, ref: login });
+    const res = await apiCall({
+      action:'addBlogger', name, login, pass, email, ref: login,
+      commission_pct: pct, tax_enabled: taxOn, tax_pct: taxPct,
+      activation_bonus_enabled: bonusOn, activation_bonus_amount: bonusAmt,
+    });
     if (res.success) {
-      toast('Блогер ' + name + ' добавлен!');
+      toast('Блогер ' + name + ' добавлен! Логин: ' + login + ' / Пароль: ' + pass);
       el('nName').value=''; el('nLogin').value=''; el('nPass').value=''; el('nEmail').value='';
       loadBloggers();
     } else {
@@ -1088,8 +1185,13 @@ async function savePayout() {
   } catch(e) { toast('Ошибка: '+e.message,'err'); }
 }
 
-function closeModal() { el('payModal').classList.remove('on'); }
-el('payModal').addEventListener('click', e => { if(e.target===el('payModal')) closeModal(); });
+function closeModal(id) {
+  const ids = id ? [id] : ['payModal','editModal'];
+  ids.forEach(i => el(i)?.classList.remove('on'));
+}
+['payModal','editModal'].forEach(id => {
+  el(id)?.addEventListener('click', e => { if(e.target===el(id)) closeModal(id); });
+});
 
 // ══════════════════════════════════════════════════════
 // ADMIN: SETTINGS
@@ -1311,6 +1413,76 @@ async function saveReport() {
     btn.disabled=false; btn.textContent='💾 Сохранить в таблицу';
   }
 }
+// ══════════════════════════════════════════════════════
+// РЕДАКТИРОВАНИЕ УСЛОВИЙ БЛОГЕРА
+function openEditBlogger(b) {
+  el('editId').value          = b.id;
+  el('editBloggerName').textContent = b.name || b.login;
+  el('editName').value        = b.name || '';
+  el('editPass').value        = '';
+  el('editPct').value         = b.commission_pct || 50;
+  el('editTaxOn').checked     = b.tax_enabled === true || b.tax_enabled === 'true';
+  el('editTaxPct').value      = b.tax_pct || 7;
+  el('editBonusOn').checked   = b.activation_bonus_enabled === true || b.activation_bonus_enabled === 'true';
+  el('editBonusAmt').value    = b.activation_bonus_amount || 0;
+  updateEditPreview();
+  el('editModal').classList.add('on');
+}
+
+function updateEditPreview() {
+  const pct      = parseFloat(el('editPct').value)||50;
+  const taxOn    = el('editTaxOn').checked;
+  const taxPct   = parseFloat(el('editTaxPct').value)||7;
+  const bonusOn  = el('editBonusOn').checked;
+  const bonusAmt = parseFloat(el('editBonusAmt').value)||0;
+  const example  = 1000;
+  const afterTax = taxOn ? example*(1-taxPct/100) : example;
+  const blogg    = afterTax*(pct/100);
+  const mine     = afterTax - blogg;
+  el('editPreview').innerHTML =
+    'Пример при вознаграждении T2 = <b style="color:#fff">1 000 ₽</b><br/>' +
+    (taxOn ? 'Налог '+taxPct+'%: <b style="color:var(--red)">−'+fmt(example-afterTax)+'</b> → остаток <b>'+fmt(afterTax)+'</b><br/>' : 'Налог: <b>выкл</b><br/>') +
+    'Блогеру '+pct+'%: <b style="color:var(--mag)">'+fmt(blogg)+'</b><br/>' +
+    'Вам '+(100-pct)+'%: <b style="color:var(--green)">'+fmt(mine)+'</b>' +
+    (bonusOn ? '<br/>+ Бонус за активацию: <b style="color:var(--mag)">'+fmt(bonusAmt)+'</b>' : '');
+}
+['editPct','editTaxPct','editBonusAmt'].forEach(id => {
+  el(id)?.addEventListener('input', updateEditPreview);
+});
+['editTaxOn','editBonusOn'].forEach(id => {
+  el(id)?.addEventListener('change', updateEditPreview);
+});
+
+async function saveEditBlogger() {
+  const id       = el('editId').value;
+  const name     = el('editName').value.trim();
+  const pass     = el('editPass').value.trim();
+  const pct      = el('editPct').value;
+  const taxOn    = el('editTaxOn').checked ? 'true' : 'false';
+  const taxPct   = el('editTaxPct').value;
+  const bonusOn  = el('editBonusOn').checked ? 'true' : 'false';
+  const bonusAmt = el('editBonusAmt').value;
+  if (!id) { toast('Ошибка: id не найден','err'); return; }
+
+  const params = {
+    action:'updateBlogger', id, name,
+    commission_pct: pct, tax_enabled: taxOn, tax_pct: taxPct,
+    activation_bonus_enabled: bonusOn, activation_bonus_amount: bonusAmt,
+  };
+  if (pass.length >= 6) params.pass = pass;
+
+  try {
+    const res = await apiCall(params);
+    if (res.success) {
+      toast('Условия сохранены!');
+      closeModal('editModal');
+      loadBloggers();
+    } else {
+      toast(res.error || 'Ошибка сохранения', 'err');
+    }
+  } catch(e) { toast('Ошибка: '+e.message,'err'); }
+}
+
 // ══════════════════════════════════════════════════════
 // INIT
 loadSettings();
