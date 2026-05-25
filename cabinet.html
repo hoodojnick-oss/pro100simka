@@ -775,48 +775,48 @@ async function doLogin() {
   err.classList.remove('on');
   if (!login || !pass) { err.textContent='Заполните все поля'; err.classList.add('on'); return; }
 
+  // Администратор — всегда локально, без API
+  if (login === 'admin' && pass === 'admin123') {
+    enterAs({ success:true, role:'admin',
+      blogger:{ login:'admin', name:'Администратор', ref:'__admin__' } });
+    return;
+  }
+
   load.classList.add('on');
 
-  // Сначала пробуем через JSONP (GET)
-  let res = null;
+  // Блогер — проверяем через Apps Script (JSONP)
   try {
-    res = await Promise.race([
+    const res = await Promise.race([
       apiCall({ action:'login', login, pass }),
-      new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 8000))
+      new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 10000))
     ]);
-  } catch(e) {
-    console.warn('JSONP login failed:', e.message);
-  }
-
-  // Если JSONP не сработал — пробуем admin локально
-  if (!res) {
-    if (login === 'admin' && pass === 'admin123') {
-      res = { success: true, role: 'admin', blogger: { login:'admin', name:'Администратор', ref:'__admin__' } };
+    load.classList.remove('on');
+    if (res && res.success) {
+      enterAs(res);
     } else {
-      load.classList.remove('on');
-      err.textContent = 'Ошибка соединения с сервером. Проверьте интернет.';
+      err.textContent = (res && res.error) || 'Неверный логин или пароль';
       err.classList.add('on');
-      return;
     }
-  }
-
-  load.classList.remove('on');
-  if (res.success) {
-    CUR = res;
-    if (res.role === 'admin') {
-      showPage('admin');
-      aTab('report');
-    } else {
-      showPage('blogger');
-      set('bNavName', res.blogger.name);
-      set('bDashName', res.blogger.name);
-      el('bMyLink').textContent = 'https://pro100simka.ru/?ref=' + (res.blogger.ref || res.blogger.login);
-      loadBloggerDash();
-      bTab('overview');
-    }
-  } else {
-    err.textContent = res.error || 'Неверный логин или пароль';
+  } catch(e) {
+    load.classList.remove('on');
+    console.warn('Login API error:', e.message);
+    err.textContent = 'Не удалось подключиться к серверу. Проверьте интернет и попробуйте ещё раз.';
     err.classList.add('on');
+  }
+}
+
+function enterAs(res) {
+  CUR = res;
+  if (res.role === 'admin') {
+    showPage('admin');
+    aTab('report');
+  } else {
+    showPage('blogger');
+    set('bNavName', res.blogger.name);
+    set('bDashName', res.blogger.name);
+    el('bMyLink').textContent = 'https://pro100simka.ru/?ref=' + (res.blogger.ref || res.blogger.login);
+    loadBloggerDash();
+    bTab('overview');
   }
 }
 
