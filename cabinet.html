@@ -1100,6 +1100,57 @@ async function savePayout(){
 }
 
 // ═══════════════════════════════════════════════
+// ПРИВЯЗКА SIM К БЛОГЕРУ
+function loadAssignBloggers() {
+  const sel = document.getElementById('assignBlogger');
+  sel.innerHTML = '<option value="">Loading...</option>';
+  api({action:'getBloggers'}).then(res => {
+    S.bloggers = res.bloggers || [];
+    sel.innerHTML = '<option value="">-- Выберите блогера --</option>';
+    S.bloggers.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.ref || b.login;
+      opt.textContent = (b.name||b.login) + ' (?ref=' + (b.ref||b.login) + ')';
+      sel.appendChild(opt);
+    });
+    if(!S.bloggers.length) sel.innerHTML = '<option value="">Нет блогеров</option>';
+  }).catch(e => {
+    sel.innerHTML = '<option value="">Ошибка</option>';
+    toast('Ошибка загрузки блогеров: '+e.message,'er');
+  });
+  const ta = document.getElementById('assignSims');
+  if(ta && !ta._cnt){
+    ta._cnt=true;
+    ta.addEventListener('input',()=>{
+      const n=ta.value.split('\n').filter(l=>l.replace(/[^0-9]/g,'').length>=10).length;
+      document.getElementById('assignCount').textContent = n>0?n+' номеров':'';
+    });
+  }
+}
+
+async function assignSims() {
+  const bloggerRef = document.getElementById('assignBlogger').value;
+  const simsText   = document.getElementById('assignSims').value;
+  const sims = simsText.split('\n').map(l=>l.replace(/[^0-9]/g,'').trim()).filter(l=>l.length>=10);
+  if(!bloggerRef){toast('Выберите блогера','er');return;}
+  if(!sims.length){toast('Введите номера SIM','er');return;}
+  const btn=document.querySelector('[onclick="assignSims()"]');
+  btn.disabled=true;btn.textContent='Сохраняем...';
+  try{
+    const res=await api({action:'assignSims',blogger:bloggerRef,sims:sims.join(','),count:sims.length});
+    btn.disabled=false;btn.textContent='Привязать номера';
+    if(res.success){
+      document.getElementById('assignResult').style.display='block';
+      document.getElementById('assignResultTitle').textContent='Привязано '+res.added+' номеров к '+bloggerRef;
+      document.getElementById('assignResultBody').innerHTML='Номера добавлены в лист Заказы.<br/>При загрузке отчёта T2 комиссия посчитается автоматически.';
+      toast('Привязано '+res.added+' номеров!');
+      document.getElementById('assignSims').value='';
+      document.getElementById('assignCount').textContent='';
+    } else toast(res.error||'Ошибка','er');
+  }catch(e){btn.disabled=false;btn.textContent='Привязать номера';toast('Ошибка: '+e.message,'er');}
+}
+
+// ═══════════════════════════════════════════════
 // СТАТИСТИКА
 async function loadStats(){
   try{
