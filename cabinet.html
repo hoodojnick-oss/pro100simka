@@ -704,6 +704,7 @@ let DASH_DATA = null;
 let ALL_SIMS  = [];
 let ALL_ORDERS= [];
 let CFG       = {}; // совместимость
+let BLOGGERS_MAP = {}; // id → данные блогера
 
 // ══════════════════════════════════════════════════════
 // UTILS
@@ -781,25 +782,34 @@ async function doLogin() {
 
   load.classList.add('on');
 
-  // Блогер — проверяем через Apps Script (JSONP)
-  try {
-    const res = await Promise.race([
-      apiCall({ action:'login', login, pass }),
-      new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 10000))
-    ]);
-    load.classList.remove('on');
-    if (res && res.success) {
-      enterAs(res);
-    } else {
-      err.textContent = (res && res.error) || 'Неверный логин или пароль';
+  // Блогер — проверяем через Apps Script
+  let attempts = 0;
+  const tryLogin = async () => {
+    attempts++;
+    try {
+      const res = await Promise.race([
+        apiCall({ action:'login', login, pass }),
+        new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), 20000))
+      ]);
+      load.classList.remove('on');
+      if (res && res.success) {
+        enterAs(res);
+      } else {
+        err.textContent = (res && res.error) || 'Неверный логин или пароль';
+        err.classList.add('on');
+      }
+    } catch(e) {
+      if (attempts < 2) {
+        console.warn('Login attempt', attempts, 'failed, retrying...');
+        load.querySelector('span').style.display = 'inline-block';
+        return tryLogin();
+      }
+      load.classList.remove('on');
+      err.textContent = 'Ошибка соединения. Попробуйте ещё раз.';
       err.classList.add('on');
     }
-  } catch(e) {
-    load.classList.remove('on');
-    console.warn('Login API error:', e.message);
-    err.textContent = 'Не удалось подключиться к серверу. Проверьте интернет и попробуйте ещё раз.';
-    err.classList.add('on');
-  }
+  };
+  await tryLogin();
 }
 
 function enterAs(res) {
@@ -1013,6 +1023,9 @@ function renderBloggersList(bloggers, pays) {
     return;
   }
   container.innerHTML = '';
+  // Сохраняем данные блогеров для редактирования
+  BLOGGERS_MAP = {};
+  bloggers.forEach(b => { BLOGGERS_MAP[b.id] = b; });
   bloggers.forEach(b => {
     const myPays = pays.filter(p => p.ref === b.ref || p.ref === b.login);
     const acc    = myPays.reduce((s,p)=>s+(parseFloat(p.accrued)||0),0);
@@ -1044,7 +1057,7 @@ function renderBloggersList(bloggers, pays) {
         '<button class="btn btn-red btn-sm" id="del_'+b.id+'">Удалить</button>'+
       '</div>';
 
-    row.querySelector('#edit_'+b.id).addEventListener('click', () => openEditBlogger(b));
+    row.querySelector('#edit_'+b.id).addEventListener('click', () => openEditBlogger(BLOGGERS_MAP[b.id] || b));
     row.querySelector('#del_'+b.id).addEventListener('click',  () => deleteBlogger(b.id, b.name||b.login));
     container.appendChild(row);
   });
@@ -1095,24 +1108,29 @@ async function loadOrders() {
     const res = await apiCall({ action:'getOrders' });
     ALL_ORDERS = res.orders || [];
     renderOrders(ALL_ORDERS);
-  } catch(e) { toast('Ошибка: '+e.message,'err'); }
+    return ALL_ORDERS;
+  } catch(e) { toast('Ошибка: '+e.message,'err'); return []; }
 }
 
 function renderOrders(orders) {
   const tbody = el('ordersTable');
   if (!orders.length) {
-    tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><span class="empty-ico">📦</span><div class="empty-t">Нет заказов</div></div></td></tr>`;
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><span class="empty-ico">📦</span><div class="empty-t">Нет заказов</div><div class="empty-s">Нажмите «Синхр. заказы» для обновления</div></div></td></tr>';
     return;
   }
-  tbody.innerHTML = orders.map(o=>`<tr>
-    <td class="td-gray">${o.timestamp||'—'}</td>
-    <td>${[o.fam,o.im,o.otch].filter(Boolean).join(' ')||'—'}</td>
-    <td class="td-num">${o.phone||'—'}</td>
-    <td>${o.plan||'—'}</td>
-    <td style="color:var(--mag);font-weight:600">${o.blogger||'—'}</td>
-    <td class="td-num">${o.simNumber||'<span style="color:var(--g60)">не присвоен</span>'}</td>
-    <td><span class="sbadge ${o.simNumber?'sb-green':'sb-amber'}">${o.simNumber?'Отправлен':'Ожидает'}</span></td>
-  </tr>`).join('');
+  tbody.innerHTML = orders.map(o => {
+    const fio = [o.fam,o.im,o.otch].filter(Boolean).join(' ') || '—';
+    const hasSim = o.simNumber && o.simNumber.trim();
+    return '<tr>'
+      +'<td class="td-gray">'+(o.timestamp||'—')+'</td>'
+      +'<td>'+fio+'</td>'
+      +'<td class="td-num">'+(o.phone||'—')+'</td>'
+      +'<td>'+(o.plan||'—')+'</td>'
+      +'<td style="color:var(--mag);font-weight:600">'+(o.blogger||'прямой переход')+'</td>'
+      +'<td class="td-num">'+(hasSim ? o.simNumber : '<span style="color:var(--g60)">не присвоен</span>')+'</td>'
+      +'<td><span class="sbadge '+(hasSim?'sb-green':'sb-amber')+'">'+(hasSim?'Отправлен':'Ожидает')+'</span></td>'
+      +'</tr>';
+  }).join('');
 }
 
 function filterOrders(q) {
