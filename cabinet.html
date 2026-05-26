@@ -350,6 +350,7 @@ tbody td{padding:9px 14px;font-size:.78rem}
 <div class="layout">
   <div class="sidebar">
     <div class="si on" id="asi-report" onclick="aTab('report')"><span class="si-ico">📤</span>Загрузить отчёт</div>
+    <div class="si" id="asi-assign" onclick="aTab('assign')"><span class="si-ico">📲</span>Привязать SIM</div>
     <div class="si" id="asi-bloggers" onclick="aTab('bloggers')"><span class="si-ico">👥</span>Блогеры</div>
     <div class="si" id="asi-orders" onclick="aTab('orders')"><span class="si-ico">📦</span>Заказы</div>
     <div class="si" id="asi-payouts" onclick="aTab('payouts')"><span class="si-ico">💰</span>Выплаты</div>
@@ -387,6 +388,42 @@ tbody td{padding:9px 14px;font-size:.78rem}
           <tbody id="previewBody"></tbody>
         </table></div>
         <button class="btn btn-mag" id="saveBtn" onclick="saveReport()" style="margin-top:10px">💾 Сохранить в таблицу</button>
+      </div>
+    </div>
+
+    <!-- Привязать SIM -->
+    <div id="at-assign" style="display:none">
+      <div class="sec-title">📲 Массовая привязка SIM к блогеру</div>
+      <div style="background:rgba(255,52,149,.06);border:1px solid rgba(255,52,149,.15);border-radius:var(--r);padding:12px 14px;font-size:.75rem;color:var(--g2);margin-bottom:16px;line-height:1.7">
+        Введите список номеров SIM — они будут привязаны к выбранному блогеру.<br/>
+        Когда придёт отчёт T2, эти номера автоматически найдутся и комиссия посчитается по условиям блогера.
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Выбор блогера</div>
+        <select class="fi" id="assignBlogger" style="margin-bottom:0;cursor:pointer">
+          <option value="">— Выберите блогера —</option>
+        </select>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Список номеров SIM</div>
+        <div style="font-size:.72rem;color:var(--g2);margin-bottom:8px">
+          Вводите по одному номеру на строку. Формат: 79991234567 или +7(999)123-45-67
+        </div>
+        <textarea class="fi" id="assignSims" rows="10" placeholder="79991234567&#10;79997654321&#10;79991112233&#10;..." style="resize:vertical;font-family:monospace;font-size:.82rem;line-height:1.7;margin-bottom:0"></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn btn-mag" onclick="assignSims()">📲 Привязать номера</button>
+        <span style="font-size:.78rem;color:var(--g2)" id="assignCount"></span>
+      </div>
+
+      <div id="assignResult" style="display:none">
+        <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--r2);padding:16px">
+          <div style="font-weight:700;color:var(--green);margin-bottom:8px" id="assignResultTitle"></div>
+          <div style="font-size:.78rem;color:var(--g2)" id="assignResultBody"></div>
+        </div>
       </div>
     </div>
 
@@ -475,9 +512,9 @@ tbody td{padding:9px 14px;font-size:.78rem}
 <div class="mnav" id="mnav-a" style="display:none">
   <div class="mnav-inner">
     <div class="mni on" id="mni-report" onclick="aTab('report')"><span class="ico">📤</span>Отчёт</div>
+    <div class="mni" id="mni-assign" onclick="aTab('assign')"><span class="ico">📲</span>SIM</div>
     <div class="mni" id="mni-bloggers" onclick="aTab('bloggers')"><span class="ico">👥</span>Блогеры</div>
     <div class="mni" id="mni-orders" onclick="aTab('orders')"><span class="ico">📦</span>Заказы</div>
-    <div class="mni" id="mni-payouts" onclick="aTab('payouts')"><span class="ico">💰</span>Выплаты</div>
     <div class="mni" id="mni-stats" onclick="aTab('stats')"><span class="ico">📊</span>Статистика</div>
   </div>
 </div>
@@ -779,11 +816,12 @@ function copyLink(){
 // ═══════════════════════════════════════════════
 // ТАБЫ АДМИНА
 function aTab(tab) {
-  ['report','bloggers','orders','payouts','stats'].forEach(t=>{
+  ['report','assign','bloggers','orders','payouts','stats'].forEach(t=>{
     $('at-'+t).style.display = t===tab?'block':'none';
     $('asi-'+t)?.classList.toggle('on',t===tab);
     $('mni-'+t)?.classList.toggle('on',t===tab);
   });
+  if(tab==='assign')   loadAssignBloggers();
   if(tab==='bloggers') loadBloggers();
   if(tab==='orders')   loadOrders();
   if(tab==='payouts')  loadPayouts();
