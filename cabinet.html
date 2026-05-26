@@ -1239,6 +1239,22 @@ function closeModal(){
 }
 $('mPay').addEventListener('click',e=>{if(e.target===$('mPay'))closeModal();});
 $('mEdit').addEventListener('click',e=>{if(e.target===$('mEdit'))closeModal();});
+
+// ═══ АВТОПРОГРЕВ APPS SCRIPT ═══
+// Делаем тихий запрос сразу при загрузке страницы
+// чтобы Apps Script «проснулся» до входа пользователя
+(function warmup() {
+  const ping = () => {
+    fetch(API + '?action=ping')
+      .then(r => r.text())
+      .then(() => console.log('[warmup] Apps Script прогрет'))
+      .catch(e => console.warn('[warmup] ошибка:', e.message));
+  };
+  // Первый прогрев через 1 сек после загрузки
+  setTimeout(ping, 1000);
+  // Повторный прогрев каждые 4 минуты (пока страница открыта)
+  setInterval(ping, 4 * 60 * 1000);
+})();
 </script>
 </body>
 </html>
