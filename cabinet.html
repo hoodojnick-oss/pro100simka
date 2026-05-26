@@ -383,7 +383,7 @@ tbody td{padding:9px 14px;font-size:.78rem}
         </div>
         <div class="sec-title">Предпросмотр (первые 20)</div>
         <div class="tw"><table>
-          <thead><tr><th>Номер SIM</th><th>Дата акт.</th><th>Блогер</th><th>Пред. периоды</th><th>За период</th><th>Начислено</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Номер SIM</th><th>Дата акт.</th><th>Блогер</th><th>Пред. периоды</th><th>За период T2</th><th>Комиссия</th><th>Статус</th></tr></thead>
           <tbody id="previewBody"></tbody>
         </table></div>
         <button class="btn btn-mag" id="saveBtn" onclick="saveReport()" style="margin-top:10px">💾 Сохранить в таблицу</button>
@@ -950,22 +950,59 @@ function renderOrders(orders){
   const tb=$('ordersTable');
   $('ordersCount').textContent='Заказов: '+(orders.length||0);
   if(!orders.length){
-    tb.innerHTML='<tr><td colspan="7"><div style="text-align:center;padding:24px;color:var(--g2)">Нет заказов — нажмите «Обновить»</div></td></tr>';
+    tb.innerHTML='<tr><td colspan="8"><div style="text-align:center;padding:24px;color:var(--g2)">Нет заказов — нажмите «Обновить»</div></td></tr>';
     return;
   }
-  tb.innerHTML=orders.map(o=>{
+  tb.innerHTML='';
+  orders.forEach((o,idx)=>{
     const fio=[o.fam,o.im,o.otch].filter(Boolean).join(' ')||'—';
     const hasSim=o.simNumber&&o.simNumber.trim();
-    return '<tr>'
-      +'<td class="td-g">'+(o.timestamp||'—')+'</td>'
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td class="td-g">'+(o.timestamp||'—')+'</td>'
       +'<td>'+fio+'</td>'
       +'<td class="td-n">'+(o.phone||'—')+'</td>'
       +'<td>'+(o.plan||'—')+'</td>'
       +'<td class="td-m">'+(o.blogger||'прямой переход')+'</td>'
-      +'<td class="td-n">'+(hasSim?o.simNumber:'<span style="color:var(--g2)">не присвоен</span>')+'</td>'
+      +'<td>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+          +'<input type="text" value="'+(o.simNumber||'')+'" placeholder="Введите номер SIM"'
+            +' style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;'
+            +'padding:5px 8px;color:var(--white);font-size:.75rem;width:140px;outline:none" '
+            +'id="sim_'+idx+'"/>'
+          +'<button class="btn btn-mag btn-sm save-sim-btn" data-idx="'+idx+'" data-id="'+(o.id||'')+'" data-row="'+(o.rowNum||idx+2)+'">💾</button>'
+        +'</div>'
+      +'</td>'
       +'<td><span class="sb '+(hasSim?'sb-g':'sb-a')+'">'+(hasSim?'Отправлен':'Ожидает')+'</span></td>'
       +'</tr>';
-  }).join('');
+    // Подсвечиваем инпут при фокусе
+    const inp=tr.querySelector('#sim_'+idx);
+    inp.addEventListener('focus',()=>inp.style.borderColor='var(--mag)');
+    inp.addEventListener('blur', ()=>inp.style.borderColor='var(--border)');
+    inp.addEventListener('keydown', e=>{if(e.key==='Enter') tr.querySelector('.save-sim-btn').click();});
+    // Кнопка сохранить
+    tr.querySelector('.save-sim-btn').addEventListener('click', async function(){
+      const simNum=inp.value.trim();
+      const rowNum=parseInt(this.dataset.row)||0;
+      const orderId=this.dataset.id;
+      if(!simNum){toast('Введите номер SIM','er');return;}
+      this.textContent='⏳';this.disabled=true;
+      try{
+        const res=await api({action:'saveSim',orderId,simNumber:simNum,rowNum});
+        if(res.success){
+          toast('Номер SIM сохранён!');
+          // Обновляем статус
+          const sb=tr.querySelector('.sb');
+          sb.className='sb sb-g';sb.textContent='Отправлен';
+          // Обновляем в кэше
+          const order=S.orders.find(x=>x.id===orderId||(x.rowNum&&x.rowNum===rowNum));
+          if(order) order.simNumber=simNum;
+        } else toast(res.error||'Ошибка','er');
+      }catch(e){toast('Ошибка: '+e.message,'er');}
+      this.textContent='💾';this.disabled=false;
+    });
+    tb.appendChild(tr);
+  });
 }
 
 function filterOrders(q){
@@ -1104,6 +1141,8 @@ async function onFile(file){
         ? new Date(Math.round((periodRaw-25569)*86400*1000)).toLocaleDateString('ru-RU',{month:'long',year:'numeric'})
         : String(periodRaw||'');
 
+      // Сохраняем ТОЛЬКО сырые данные от T2 — без расчёта комиссии
+      // Расчёт делается на сервере (Apps Script) по индивидуальным условиям блогера
       parsedRows=raw.slice(1).filter(r=>r[C.payType]==='Выплата').map(r=>({
         msisdn:       String(r[C.msisdn]||r[C.msisdnA]||'').trim(),
         activationDate: typeof r[C.actDate]==='number'
@@ -1111,7 +1150,9 @@ async function onFile(file){
           : String(r[C.actDate]||''),
         prevAmount:   parseFloat(r[C.prevAmt])||0,
         periodAmount: parseFloat(r[C.perAmt])||0,
+        // Статус: Активна если есть траты за период, Спит если нет
         status: (parseFloat(r[C.perAmt])||0)>0?'Активна':'Спит',
+        // Комиссия НЕ считается здесь — только в Apps Script
       }));
 
       bar.style.width='80%';
@@ -1144,7 +1185,7 @@ async function onFile(file){
           +'<td>'+(ref?'<span style="color:var(--mag);font-weight:600">'+ref+'</span>':'<span style="color:var(--g2)">не закреплён</span>')+'</td>'
           +'<td>'+fmt(r.prevAmount)+'</td>'
           +'<td>'+fmt(r.periodAmount)+'</td>'
-          +'<td class="'+(ref?'td-m':'td-g')+'">'+(ref?'—*':'—')+'</td>'
+          +'<td class="td-g" title="Рассчитывается по условиям блогера">авто</td>'
           +'<td><span class="sb '+(sc[r.status]||'sb-n')+'">'+r.status+'</span></td>'
           +'</tr>';
       }).join('');
