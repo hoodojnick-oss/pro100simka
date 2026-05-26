@@ -1043,7 +1043,12 @@ function chooseDeliv(el){
 ────────────────────────────────────────────────── */
 document.getElementById('inPhone').addEventListener('input', function(){
   let v = this.value.replace(/\D/g,'');
+  // Если начинается с 8 — заменяем на 7
   if(v.startsWith('8')) v = '7'+v.slice(1);
+  // Если начинается с 9 — автоматически добавляем 7 спереди
+  if(v.startsWith('9')) v = '7'+v;
+  // Если начинается с чего-то другого (не 7) — добавляем 7
+  if(v.length>0 && !v.startsWith('7')) v = '7'+v;
   let r = '';
   if(v.length>0) r='+7';
   if(v.length>1) r+='('+v.slice(1,4);
@@ -1051,6 +1056,14 @@ document.getElementById('inPhone').addEventListener('input', function(){
   if(v.length>=7) r+='-'+v.slice(7,9);
   if(v.length>=9) r+='-'+v.slice(9,11);
   this.value=r;
+});
+
+// Обработка keydown — если первая цифра 9, сразу ставим +7(9
+document.getElementById('inPhone').addEventListener('keydown', function(e){
+  if(this.value==='' && e.key==='9'){
+    e.preventDefault();
+    this.value='+7(9';
+  }
 });
 
 /* Карта маска */
@@ -1166,26 +1179,27 @@ async function doPayment(){
   try {
     const APPS_URL = 'https://soft-sky-708f.hoodojnick-068.workers.dev';
 
-    // Google Apps Script требует form-data, не JSON — иначе CORS блокирует
-    const form = new FormData();
-    form.append('fam',      ORDER.fam);
-    form.append('im',       ORDER.im);
-    form.append('otch',     ORDER.otch);
-    form.append('phone',    ORDER.phone);
-    form.append('plan',     PLAN_DATA[ORDER.plan].label);
-    form.append('delivery', ORDER.deliv);
-    form.append('city',     ORDER.city);
-    form.append('street',   ORDER.street);
-    form.append('blogger',  ORDER.blogger);
-    form.append('sum',      '200 ₽');
-    form.append('source',   'pro100simka.ru');
+    // Отправляем JSON через Cloudflare Worker → Apps Script
+    const payload = {
+      fam:      ORDER.fam,
+      im:       ORDER.im,
+      otch:     ORDER.otch,
+      phone:    ORDER.phone,
+      plan:     PLAN_DATA[ORDER.plan].label,
+      delivery: ORDER.deliv,
+      city:     ORDER.city,
+      street:   ORDER.street,
+      blogger:  ORDER.blogger,
+      sum:      '200 ₽',
+      source:   'pro100simka.ru',
+    };
 
-    // no-cors — позволяет отправить без preflight, ответ будет opaque (это норм)
     fetch(APPS_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      body: form
-    }).catch(err => console.warn('[ПРО100СИМка] fetch warn:', err));
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(r => console.log('[ПРО100СИМка] Заказ отправлен:', r.status))
+      .catch(err => console.warn('[ПРО100СИМка] fetch warn:', err));
 
     // Показываем успех сразу — данные уходят асинхронно
     showSuccess();
