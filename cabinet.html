@@ -527,6 +527,10 @@ tbody td{padding:9px 14px;font-size:.78rem}
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <input class="tw-search" style="width:200px" type="text" id="fSearch" placeholder="Поиск по имени, телефону..." oninput="applyOrderFilters()"/>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;cursor:pointer;flex-shrink:0">
+            <input type="checkbox" id="fUnpaid" style="accent-color:var(--mag)" onchange="applyOrderFilters()"/>
+            <span>Только неоплаченные 200₽</span>
+          </label>
           <button class="btn btn-dark btn-sm" onclick="resetOrderFilters()">✕ Сбросить</button>
           <span style="font-size:.78rem;color:var(--g2)" id="ordersCount">Заказов: 0</span>
         </div>
@@ -1049,7 +1053,7 @@ async function syncOrders(showAll) {
     // Строим Map статусов SIM из отчёта T2
     S.simStatusMap = {};
     (repRes.rows||[]).forEach(r=>{
-      if(r.msisdn) S.simStatusMap[r.msisdn.replace(/\D/g,'')] = r.status;
+      if(r.msisdn) S.simStatusMap[r.msisdn.replace(/[^0-9]/g,'')] = r.status;
     });
 
     if(showAll){
@@ -1130,6 +1134,27 @@ function renderOrders(orders){
   });
 }
 
+// Отметить оплату 200₽
+async function mark200paid(orderId, rowNum, btn) {
+  btn.disabled=true; btn.textContent='⏳';
+  try {
+    const res = await api({action:'mark200paid', orderId, rowNum});
+    if(res.success) {
+      toast('200₽ отмечено как оплачено!');
+      // Обновляем в кэше
+      const o = S.orders.find(x=>x.id===orderId||(x.rowNum&&String(x.rowNum)===String(rowNum)));
+      if(o) o.paid200 = true;
+      applyOrderFilters();
+    } else {
+      toast(res.error||'Ошибка','er');
+      btn.disabled=false; btn.textContent='💳 Оплатить';
+    }
+  } catch(e) {
+    toast('Ошибка: '+e.message,'er');
+    btn.disabled=false; btn.textContent='💳 Оплатить';
+  }
+}
+
 // Заполняем фильтр блогеров
 function populateOrderFilters() {
   const sel = document.getElementById('fBlogger');
@@ -1180,6 +1205,11 @@ function applyOrderFilters() {
   if(search) filtered = filtered.filter(o=>
     JSON.stringify(o).toLowerCase().includes(search)
   );
+  // Фильтр неоплаченных 200₽ — только активированные без пометки
+  const fUnpaid = document.getElementById('fUnpaid')?.checked;
+  if(fUnpaid) filtered = filtered.filter(o=>
+    o.displayStatus==='Активирован' && !o.paid200
+  );
 
   // Показываем активные фильтры
   const bar = document.getElementById('activeFiltersBar');
@@ -1201,6 +1231,7 @@ function applyOrderFilters() {
 function resetOrderFilters() {
   ['fBlogger','fStatus','fPlan'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
   ['fDateFrom','fSearch'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+  const uf=document.getElementById('fUnpaid'); if(uf)uf.checked=false;
   applyOrderFilters();
 }
 
