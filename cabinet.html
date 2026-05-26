@@ -489,7 +489,7 @@ tbody td{padding:10px 14px;font-size:.8rem}
             <div class="stats stats-3" id="uploadStats" style="margin-bottom:0"></div>
           </div>
           <div class="card-title">Предпросмотр (первые 20 строк)</div>
-          <div class="tw"><table><thead><tr><th>Номер SIM</th><th>Дата акт.</th><th>Блогер</th><th>Сумма T2 (пред.)</th><th>Сумма T2 (период)</th><th>Начислено блогеру</th><th>Статус</th></tr></thead>
+          <div class="tw"><table><thead><tr><th>Номер SIM</th><th>Дата акт.</th><th>Блогер</th><th>Пред. периоды</th><th>За период</th><th>Начислено блогеру</th><th>Статус</th></tr></thead>
           <tbody id="previewBody"></tbody></table></div>
           <button class="btn btn-mag" onclick="saveReport()" id="saveReportBtn" style="margin-top:12px">💾 Сохранить в таблицу</button>
         </div>
@@ -748,22 +748,18 @@ async function apiCall(params) {
 
 
 async function apiPost(body) {
-  const form = new FormData();
-  Object.entries(body).forEach(([k,v]) => form.append(k, typeof v === 'object' ? JSON.stringify(v) : v));
   try {
-    await fetch(API, { method:'POST', mode:'no-cors', body: form });
-    return { success: true };
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    try { return JSON.parse(text); } catch { return { success: true }; }
   } catch(e) {
     return { success: false, error: e.message };
   }
-}
-
-// Прямой fetch (работает если Apps Script разрешает CORS)
-async function apiFetch(params) {
-  const qs = Object.entries(params)
-    .map(([k,v]) => k + '=' + encodeURIComponent(String(v))).join('&');
-  const res = await fetch(API + '?' + qs);
-  return res.json();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1295,7 +1291,7 @@ function onDragOver(e) { e.preventDefault(); el('uploadArea')?.classList.add('dr
 function onDragLeave()  { el('uploadArea')?.classList.remove('drag'); }
 function onDrop(e)      { e.preventDefault(); el('uploadArea')?.classList.remove('drag'); onFile(e.dataTransfer.files[0]); }
 
-function onFile(file) {
+async function onFile(file) {
   if (!file || !file.name.match(/\.xlsx?$/i)) { toast('Загрузите .xlsx файл','err'); return; }
   const prog = el('uploadProg');
   const bar  = el('uploadBar');
@@ -1303,7 +1299,7 @@ function onFile(file) {
   hide('uploadResult');
 
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     bar.style.width='40%';
     try {
       const wb   = XLSX.read(e.target.result, {type:'array'});
@@ -1358,15 +1354,35 @@ function onFile(file) {
         <div class="stat"><div class="stat-lbl">Сумма T2</div><div class="stat-val mag">${fmt(totalMonth)}</div></div>`;
 
       const sCls = {Активна:'sb-green',Спит:'sb-amber',Заблокирована:'sb-red'};
-      el('previewBody').innerHTML = parsedRows.slice(0,20).map(r=>`<tr>
-        <td class="td-num">${r.msisdn}</td>
-        <td class="td-gray">${typeof r.activationDate==='number'?new Date(Math.round((r.activationDate-25569)*86400*1000)).toLocaleDateString('ru-RU'):r.activationDate}</td>
-        <td class="td-gray">—</td>
-        <td>${fmt(r.prevAmount)}</td>
-        <td>${fmt(r.periodAmount)}</td>
-        <td class="td-mag">${fmt(r.bloggerComm)}</td>
-        <td><span class="sbadge ${sCls[r.status]||'sb-gray'}">${r.status}</span></td>
-      </tr>`).join('');
+      // Загружаем заказы для сопоставления блогеров
+      let orderMap = {};
+      try {
+        const ord = await apiCall({action:'getOrders'});
+        (ord.orders||[]).forEach(o => {
+          if(o.simNumber) orderMap[o.simNumber.replace(/[^0-9]/g,'')] = o.blogger||'';
+        });
+      } catch(e) { console.warn('orders not loaded', e.message); }
+
+      const rows20 = parsedRows.slice(0,20).map(r => {
+        const cleanMsisdn = r.msisdn.replace(/[^0-9]/g,'');
+        const bloggerRef  = orderMap[cleanMsisdn] || '';
+        const bloggerHtml = bloggerRef
+          ? '<span style="color:var(--mag);font-weight:600">'+bloggerRef+'</span>'
+          : '<span style="color:var(--g60)">не закреплён</span>';
+        const actDate = typeof r.activationDate==='number'
+          ? new Date(Math.round((r.activationDate-25569)*86400*1000)).toLocaleDateString('ru-RU')
+          : String(r.activationDate||'—');
+        return '<tr>'
+          +'<td class="td-num">'+r.msisdn+'</td>'
+          +'<td class="td-gray">'+actDate+'</td>'
+          +'<td>'+bloggerHtml+'</td>'
+          +'<td>'+fmt(r.prevAmount)+'</td>'
+          +'<td>'+fmt(r.periodAmount)+'</td>'
+          +'<td class="'+(bloggerRef?'td-mag':'td-gray')+'">'+( bloggerRef?fmt(r.bloggerComm):'—')+'</td>'
+          +'<td><span class="sbadge '+(sCls[r.status]||'sb-gray')+'">'+r.status+'</span></td>'
+          +'</tr>';
+      });
+      el('previewBody').innerHTML = rows20.join('');
 
       el('saveReportBtn').dataset.period = period;
       bar.style.width='100%';
@@ -1386,19 +1402,28 @@ async function saveReport() {
   const period = btn.dataset.period || '';
   btn.disabled = true; btn.textContent = '⏳ Сохраняем...';
   try {
-    // Отправляем через apiCall (GET с данными)
-    // Для больших данных используем POST по частям
     const CHUNK = 50;
+    const total = Math.ceil(parsedRows.length / CHUNK);
     for (let i=0; i<parsedRows.length; i+=CHUNK) {
       const chunk = parsedRows.slice(i, i+CHUNK);
-      const form = new FormData();
-      form.append('action', 'uploadReport');
-      form.append('rows', JSON.stringify(chunk));
-      form.append('period', period);
-      form.append('isFirst', i===0 ? 'true' : 'false');
-      await fetch(API, { method:'POST', mode:'no-cors', body: form });
+      const chunkNum = Math.floor(i/CHUNK)+1;
+      btn.textContent = '⏳ ' + chunkNum + '/' + total + ' чанков...';
+
+      // Отправляем JSON через прокси
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action:  'uploadReport',
+          rows:    JSON.stringify(chunk),
+          period:  period,
+          isFirst: i===0 ? 'true' : 'false',
+          isLast:  (i+CHUNK >= parsedRows.length) ? 'true' : 'false',
+        }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
     }
-    toast('Отчёт сохранён в таблицу!');
+    toast('Отчёт сохранён в таблицу! ' + parsedRows.length + ' строк');
     btn.disabled=false; btn.textContent='💾 Сохранить в таблицу';
   } catch(e) {
     toast('Ошибка: '+e.message,'err');
