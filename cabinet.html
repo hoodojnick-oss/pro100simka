@@ -567,14 +567,14 @@ function toast(msg, type='ok') {
 
 // ═══════════════════════════════════════════════
 // API — прямой fetch через Cloudflare Worker
-async function api(params, retries=2) {
+async function api(params, retries=3) {
   const qs = Object.entries(params).map(([k,v])=>k+'='+encodeURIComponent(String(v))).join('&');
   const url = API + '?' + qs;
   console.log('[API]', params.action, url.slice(0,100));
   for(let i=0; i<retries; i++){
     try {
       const ctrl = new AbortController();
-      const tid  = setTimeout(()=>ctrl.abort(), 25000);
+      const tid  = setTimeout(()=>ctrl.abort(), 45000);
       const res  = await fetch(url, {signal:ctrl.signal});
       clearTimeout(tid);
       if(!res.ok) throw new Error('HTTP '+res.status);
@@ -589,7 +589,8 @@ async function api(params, retries=2) {
     } catch(e) {
       console.warn('[API] attempt', i+1, 'failed:', e.message);
       if(i===retries-1) throw e;
-      await new Promise(r=>setTimeout(r,1500));
+      const ld=document.getElementById('lLoad');if(ld&&ld.classList.contains('on'))ld.innerHTML='<span class="spin"></span> Попытка '+(i+2)+'...';
+      await new Promise(r=>setTimeout(r,2500));
     }
   }
 }
@@ -643,6 +644,7 @@ async function doLogin() {
 
   // Блогер — через API
   load.classList.add('on');
+  load.innerHTML = '<span class="spin"></span> Подключаемся...';
   try {
     const res = await api({action:'login',login,pass});
     load.classList.remove('on');
@@ -660,7 +662,7 @@ async function doLogin() {
     }
   } catch(e) {
     load.classList.remove('on');
-    err.textContent = 'Ошибка соединения. Попробуйте ещё раз.';
+    err.innerHTML = 'Медленное соединение. <a href="#" onclick="doLogin();return false;" style="color:var(--mag);font-weight:700">Попробовать ещё раз →</a>';
     err.classList.add('on');
   }
 }
