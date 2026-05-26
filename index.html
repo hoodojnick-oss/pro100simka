@@ -466,6 +466,18 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:28px 0}
   .step-back{display:block;text-align:center;width:100%;margin-top:6px}
   .order-sec{padding:40px 0}
 }
+
+/* ═══ DADATA AUTOCOMPLETE ═══ */
+.da-wrap{position:relative}
+.da-list{position:absolute;top:100%;left:0;right:0;z-index:1000;
+  background:#1a1a1a;border:1.5px solid #ff3495;border-radius:10px;
+  margin-top:2px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+.da-list.open{display:block}
+.da-item{padding:10px 14px;cursor:pointer;font-size:.85rem;transition:background .15s;border-bottom:1px solid #222}
+.da-item:last-child{border-bottom:none}
+.da-item:hover,.da-item.active{background:rgba(255,52,149,.12)}
+.da-item-main{color:#fff;font-weight:500}
+.da-item-sub{color:#666;font-size:.72rem;margin-top:2px}
 </style>
 </head>
 <body>
@@ -765,12 +777,18 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:28px 0}
 
         <div class="in-wrap">
           <label class="form-lbl">Город *</label>
-          <input class="form-in" id="inCity" type="text" placeholder="Москва" autocomplete="address-level2"/>
+          <div class="da-wrap">
+          <input class="form-in" id="inCity" type="text" placeholder="Москва" autocomplete="off"/>
+          <div class="da-list" id="daListCity"></div>
+        </div>
           <span class="emsg" id="eCity">Введите город</span>
         </div>
         <div class="in-wrap">
           <label class="form-lbl">Улица, дом, квартира *</label>
-          <input class="form-in" id="inStreet" type="text" placeholder="ул. Ленина, д. 1, кв. 5" autocomplete="street-address"/>
+          <div class="da-wrap">
+          <input class="form-in" id="inStreet" type="text" placeholder="ул. Ленина, д. 1, кв. 5" autocomplete="off"/>
+          <div class="da-list" id="daListStreet"></div>
+        </div>
           <span class="emsg" id="eStreet">Введите улицу и дом</span>
         </div>
         <div class="in-wrap">
@@ -1245,6 +1263,158 @@ document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
 ────────────────────────────────────────────────── */
 updateProgress(1);
 updateSummary();
+
+
+/* ═══════════════════════════════════════════════
+   DADATA — автодополнение адреса
+═══════════════════════════════════════════════ */
+const DADATA_TOKEN = '6396531bb0efb3e08ceee75cb64f5d59dcc4cd71';
+
+// Запрос к DaData API
+async function dadataSuggest(query, fromBound, toBound) {
+  try {
+    const res = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Token ' + DADATA_TOKEN,
+      },
+      body: JSON.stringify({
+        query: query,
+        count: 7,
+        from_bound: { value: fromBound },
+        to_bound:   { value: toBound },
+        restrict_value: false,
+      })
+    });
+    const data = await res.json();
+    return data.suggestions || [];
+  } catch(e) {
+    console.warn('DaData error:', e.message);
+    return [];
+  }
+}
+
+// Создаём автодополнение для поля
+function initDaData(inputId, listId, fromBound, toBound, onSelect) {
+  const input = document.getElementById(inputId);
+  const list  = document.getElementById(listId);
+  if(!input || !list) return;
+
+  let timer = null;
+  let activeIdx = -1;
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    const q = this.value.trim();
+    if(q.length < 2) { closeDaList(list); return; }
+    timer = setTimeout(async () => {
+      const suggestions = await dadataSuggest(q, fromBound, toBound);
+      renderDaList(list, suggestions, input, onSelect);
+    }, 250);
+  });
+
+  // Навигация клавишами
+  input.addEventListener('keydown', function(e) {
+    const items = list.querySelectorAll('.da-item');
+    if(!items.length) return;
+    if(e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx+1, items.length-1);
+      items.forEach((el,i)=>el.classList.toggle('active',i===activeIdx));
+    } else if(e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx-1, 0);
+      items.forEach((el,i)=>el.classList.toggle('active',i===activeIdx));
+    } else if(e.key === 'Enter' && activeIdx >= 0) {
+      e.preventDefault();
+      items[activeIdx].click();
+    } else if(e.key === 'Escape') {
+      closeDaList(list);
+    }
+  });
+
+  // Закрываем при клике вне
+  document.addEventListener('click', function(e) {
+    if(!input.contains(e.target) && !list.contains(e.target)) closeDaList(list);
+  });
+}
+
+function renderDaList(list, suggestions, input, onSelect) {
+  activeIdx = -1;
+  if(!suggestions.length) { closeDaList(list); return; }
+  list.innerHTML = '';
+  suggestions.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'da-item';
+    const d = s.data;
+    // Основная строка
+    const main = s.value;
+    // Подсказка (регион, город)
+    const parts = [d.region_with_type, d.city_with_type, d.settlement_with_type].filter(Boolean);
+    const sub = parts.join(', ');
+    item.innerHTML =
+      '<div class="da-item-main">' + main + '</div>' +
+      (sub && sub !== main ? '<div class="da-item-sub">' + sub + '</div>' : '');
+    item.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      input.value = main;
+      closeDaList(list);
+      if(onSelect) onSelect(s);
+    });
+    list.appendChild(item);
+  });
+  list.classList.add('open');
+}
+
+function closeDaList(list) {
+  list.classList.remove('open');
+  list.innerHTML = '';
+}
+
+// ─── Инициализация полей ──────────────────────
+
+// Поле ГОРОД — ищем только города
+initDaData('inCity', 'daListCity', 'city', 'city', function(suggestion) {
+  const d = suggestion.data;
+  // Подставляем город
+  const cityName = d.city || d.settlement || d.region;
+  document.getElementById('inCity').value = cityName || suggestion.value;
+  // После выбора города — фокус на улицу
+  setTimeout(() => document.getElementById('inStreet').focus(), 100);
+});
+
+// Поле УЛИЦА — ищем улицу+дом, учитываем выбранный город
+initDaData('inStreet', 'daListStreet', 'street', 'house', function(suggestion) {
+  const d = suggestion.data;
+  // Собираем улицу + дом + квартиру
+  let street = [
+    d.street_with_type,
+    d.house ? 'д. ' + d.house : '',
+    d.flat  ? 'кв. ' + d.flat : '',
+  ].filter(Boolean).join(', ');
+  document.getElementById('inStreet').value = street || suggestion.value;
+
+  // Если в адресе есть город — подставляем в поле города
+  const city = d.city || d.settlement;
+  if(city && !document.getElementById('inCity').value) {
+    document.getElementById('inCity').value = city;
+  }
+
+  // Подставляем индекс если есть
+  if(d.postal_code) {
+    const idxField = document.getElementById('inIdx');
+    if(idxField && !idxField.value) idxField.value = d.postal_code;
+  }
+});
+
+// Для поля улицы — добавляем город как контекст при поиске
+document.getElementById('inStreet').addEventListener('focus', function() {
+  const city = document.getElementById('inCity').value.trim();
+  if(city && !this.value) this.placeholder = 'Улица, дом, кв. — в городе ' + city;
+});
+
 </script>
 </body>
 </html>
