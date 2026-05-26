@@ -254,6 +254,7 @@ tbody td{padding:9px 14px;font-size:.78rem}
 <div class="layout">
   <div class="sidebar">
     <div class="si on" id="bsi-overview" onclick="bTab('overview')"><span class="si-ico">📊</span>Обзор</div>
+    <div class="si" id="bsi-orders" onclick="bTab('orders')"><span class="si-ico">📦</span>Мои заказы</div>
     <div class="si" id="bsi-sims" onclick="bTab('sims')"><span class="si-ico">📱</span>Абоненты</div>
     <div class="si" id="bsi-pay" onclick="bTab('pay')"><span class="si-ico">💰</span>Выплаты</div>
     <div class="si" id="bsi-link" onclick="bTab('link')"><span class="si-ico">🔗</span>Ссылка</div>
@@ -288,6 +289,35 @@ tbody td{padding:9px 14px;font-size:.78rem}
         <thead><tr><th>Номер SIM</th><th>Активация</th><th>За период</th><th>Начислено</th><th>Статус</th></tr></thead>
         <tbody id="bRecentSims"></tbody>
       </table></div>
+    </div>
+
+    <!-- Мои заказы -->
+    <div id="bt-orders" style="display:none">
+      <div class="sec-title">📦 Мои заказы <span id="bOrdersCount" style="color:var(--g2);font-size:.75rem;font-weight:400"></span></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="bOrdersFilter">
+        <button class="btn btn-mag btn-sm" onclick="filterBOrders('')" id="bof-all">Все</button>
+        <button class="btn btn-dark btn-sm" onclick="filterBOrders('Ожидает')" id="bof-wait">⏳ Ожидает</button>
+        <button class="btn btn-dark btn-sm" onclick="filterBOrders('Отправлен')" id="bof-sent">📬 Отправлен</button>
+        <button class="btn btn-dark btn-sm" onclick="filterBOrders('Активирован')" id="bof-active">✅ Активирован</button>
+        <button class="btn btn-dark btn-sm" onclick="filterBOrders('Спит')" id="bof-sleep">😴 Спит</button>
+      </div>
+      <div class="tw">
+        <div class="tw-head">
+          <span style="font-size:.8rem;font-weight:600">Заказы по вашей ссылке</span>
+          <button class="btn btn-dark btn-sm" onclick="loadBOrders()">🔄 Обновить</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Дата</th>
+            <th>Клиент</th>
+            <th>Тариф</th>
+            <th>Доставка</th>
+            <th>Номер SIM</th>
+            <th>Статус</th>
+          </tr></thead>
+          <tbody id="bOrdersTable"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Абоненты -->
@@ -501,9 +531,9 @@ tbody td{padding:9px 14px;font-size:.78rem}
 <div class="mnav" id="mnav-b" style="display:none">
   <div class="mnav-inner">
     <div class="mni on" id="mni-overview" onclick="bTab('overview')"><span class="ico">📊</span>Обзор</div>
+    <div class="mni" id="mni-orders" onclick="bTab('orders')"><span class="ico">📦</span>Заказы</div>
     <div class="mni" id="mni-sims" onclick="bTab('sims')"><span class="ico">📱</span>Абоненты</div>
     <div class="mni" id="mni-pay" onclick="bTab('pay')"><span class="ico">💰</span>Выплаты</div>
-    <div class="mni" id="mni-link" onclick="bTab('link')"><span class="ico">🔗</span>Ссылка</div>
     <div class="mni" onclick="logout()"><span class="ico">🚪</span>Выйти</div>
   </div>
 </div>
@@ -718,11 +748,12 @@ $('lLogin').addEventListener('keydown',e=>{if(e.key==='Enter')$('lPass').focus()
 // ═══════════════════════════════════════════════
 // ТАБЫ БЛОГЕРА
 function bTab(tab) {
-  ['overview','sims','pay','link'].forEach(t=>{
+  ['overview','orders','sims','pay','link'].forEach(t=>{
     $('bt-'+t).style.display = t===tab?'block':'none';
     $('bsi-'+t)?.classList.toggle('on',t===tab);
     $('mni-'+t)?.classList.toggle('on',t===tab);
   });
+  if(tab==='orders') loadBOrders();
 }
 
 // ═══════════════════════════════════════════════
@@ -1097,6 +1128,106 @@ async function savePayout(){
     if(res.success){toast('Выплата сохранена!');closeModal();loadPayouts();}
     else toast(res.error||'Ошибка','er');
   }catch(e){toast('Ошибка: '+e.message,'er');}
+}
+
+// ═══════════════════════════════════════════════
+// ЗАКАЗЫ БЛОГЕРА
+let B_ORDERS = [];
+
+async function loadBOrders() {
+  const ref = S.user?.blogger?.ref || S.user?.blogger?.login;
+  if(!ref) return;
+
+  const tbody = $('bOrdersTable');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--g2)"><span class="spin" style="display:inline-block"></span> Загрузка...</td></tr>';
+
+  try {
+    // Загружаем заказы
+    const [ordRes, repRes] = await Promise.all([
+      api({action:'getOrders'}),
+      api({action:'getReport', ref}),
+    ]);
+
+    // Фильтруем заказы блогера
+    const allOrders = (ordRes.orders||[]).filter(o => o.blogger === ref);
+    const simRows   = repRes.rows||[];
+
+    // Создаём Map статусов SIM из отчёта T2
+    const simStatus = {};
+    simRows.forEach(r => {
+      if(r.msisdn) simStatus[r.msisdn.replace(/\D/g,'')] = r.status;
+    });
+
+    // Обогащаем заказы статусом из отчёта T2
+    B_ORDERS = allOrders.map(o => {
+      const simClean = (o.simNumber||'').replace(/\D/g,'');
+      let status = 'Ожидает'; // нет номера SIM
+      if(simClean) {
+        if(simStatus[simClean]) {
+          // Статус из отчёта T2
+          status = simStatus[simClean] === 'Активна' ? 'Активирован' : simStatus[simClean];
+        } else {
+          status = 'Отправлен'; // номер есть но в отчёте нет — ещё не активирован
+        }
+      }
+      return {...o, displayStatus: status};
+    });
+
+    set('bOrdersCount', '— ' + B_ORDERS.length + ' заказов');
+    renderBOrders(B_ORDERS);
+    filterBOrders(''); // сбрасываем фильтр
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6"><div style="text-align:center;padding:20px;color:var(--red)">Ошибка: '+e.message+'</div></td></tr>';
+    toast('Ошибка загрузки: '+e.message,'er');
+  }
+}
+
+function renderBOrders(orders) {
+  const tbody = $('bOrdersTable');
+  if(!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div style="text-align:center;padding:28px;color:var(--g2)">'+
+      '<div style="font-size:2rem;margin-bottom:8px">📭</div>'+
+      '<div style="font-weight:600;color:var(--g1);margin-bottom:4px">Нет заказов</div>'+
+      '<div style="font-size:.75rem">Заказы появятся когда клиенты перейдут по вашей ссылке</div>'+
+      '</div></td></tr>';
+    return;
+  }
+
+  const statusMap = {
+    'Ожидает':    {cls:'sb-a', ico:'⏳'},
+    'Отправлен':  {cls:'sb-b', ico:'📬'},
+    'Активирован':{cls:'sb-g', ico:'✅'},
+    'Спит':       {cls:'sb-n', ico:'😴'},
+    'Заблокирована':{cls:'sb-r', ico:'🚫'},
+  };
+
+  tbody.innerHTML = orders.map(o => {
+    const st = statusMap[o.displayStatus] || {cls:'sb-n', ico:'❓'};
+    const clientName = [o.fam, o.im].filter(Boolean).join(' ') || '—';
+    const hasSim = o.simNumber && o.simNumber.trim();
+    return '<tr>'
+      +'<td class="td-g" style="font-size:.72rem">'+(o.timestamp||'—')+'</td>'
+      +'<td>'+clientName+'</td>'
+      +'<td style="font-size:.75rem">'+(o.plan||'—')+'</td>'
+      +'<td style="font-size:.75rem">'+(o.delivery||'—')+'</td>'
+      +'<td class="td-n" style="font-size:.75rem">'+(hasSim?o.simNumber:'<span style="color:var(--g2)">—</span>')+'</td>'
+      +'<td><span class="sb '+st.cls+'">'+st.ico+' '+o.displayStatus+'</span></td>'
+      +'</tr>';
+  }).join('');
+}
+
+function filterBOrders(status) {
+  // Обновляем кнопки фильтра
+  ['all','wait','sent','active','sleep'].forEach(k => {
+    $('bof-'+k)?.classList.remove('btn-mag');
+    $('bof-'+k)?.classList.add('btn-dark');
+  });
+  const map = {'':'all','Ожидает':'wait','Отправлен':'sent','Активирован':'active','Спит':'sleep'};
+  const activeBtn = $('bof-'+(map[status]||'all'));
+  if(activeBtn){activeBtn.classList.remove('btn-dark');activeBtn.classList.add('btn-mag');}
+
+  const filtered = status ? B_ORDERS.filter(o=>o.displayStatus===status) : B_ORDERS;
+  renderBOrders(filtered);
 }
 
 // ═══════════════════════════════════════════════
