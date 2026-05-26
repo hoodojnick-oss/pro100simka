@@ -491,11 +491,49 @@ tbody td{padding:9px 14px;font-size:.78rem}
     <!-- Заказы -->
     <div id="at-orders" style="display:none">
       <div class="sec-title">📦 Заказы <button class="btn btn-dark btn-sm" onclick="syncOrders(true)">🔄 Обновить</button></div>
-      <div class="tw">
-        <div class="tw-head">
-          <span style="font-size:.8rem;font-weight:600" id="ordersCount">Заказы</span>
-          <input class="tw-search" type="text" placeholder="Поиск..." oninput="filterOrders(this.value)"/>
+
+      <!-- Фильтры -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="fl" style="margin-bottom:4px">Блогер</label>
+            <select class="fi" id="fBlogger" style="margin-bottom:0" onchange="applyOrderFilters()">
+              <option value="">Все блогеры</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl" style="margin-bottom:4px">Статус SIM</label>
+            <select class="fi" id="fStatus" style="margin-bottom:0" onchange="applyOrderFilters()">
+              <option value="">Все статусы</option>
+              <option value="Ожидает">⏳ Ожидает SIM</option>
+              <option value="Отправлен">📬 Отправлен</option>
+              <option value="Активирован">✅ Активирован</option>
+              <option value="Спит">😴 Спит</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl" style="margin-bottom:4px">Тариф</label>
+            <select class="fi" id="fPlan" style="margin-bottom:0" onchange="applyOrderFilters()">
+              <option value="">Все тарифы</option>
+              <option value="Партнёр M">Партнёр M</option>
+              <option value="Партнёр L">Партнёр L</option>
+              <option value="Партнёр L MAX">Партнёр L MAX</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl" style="margin-bottom:4px">Дата от</label>
+            <input class="fi" id="fDateFrom" type="date" style="margin-bottom:0" onchange="applyOrderFilters()"/>
+          </div>
         </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <input class="tw-search" style="width:200px" type="text" id="fSearch" placeholder="Поиск по имени, телефону..." oninput="applyOrderFilters()"/>
+          <button class="btn btn-dark btn-sm" onclick="resetOrderFilters()">✕ Сбросить</button>
+          <span style="font-size:.78rem;color:var(--g2)" id="ordersCount">Заказов: 0</span>
+        </div>
+      </div>
+
+      <div class="tw">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap" id="activeFiltersBar" style="display:none"></div>
         <table><thead><tr><th>Дата</th><th>ФИО</th><th>Телефон</th><th>Тариф</th><th>Блогер</th><th>Номер SIM</th><th>Статус</th></tr></thead>
         <tbody id="ordersTable"></tbody></table>
       </div>
@@ -606,12 +644,13 @@ const API = 'https://soft-sky-708f.hoodojnick-068.workers.dev';
 // ═══════════════════════════════════════════════
 // СОСТОЯНИЕ
 let S = {
-  user: null,      // { role, blogger }
+  user: null,
   orders: [],
   bloggers: [],
   sims: [],
   payments: [],
   dash: null,
+  simStatusMap: {},
 };
 
 // ═══════════════════════════════════════════════
@@ -1000,10 +1039,22 @@ async function saveEdit(){
 // ЗАКАЗЫ
 async function syncOrders(showAll) {
   try {
-    const res = await api({action:'getOrders'});
-    S.orders = res.orders||[];
+    // Загружаем заказы и статусы SIM параллельно
+    const [ordRes, repRes] = await Promise.all([
+      api({action:'getOrders'}),
+      api({action:'getReport'}).catch(()=>({rows:[]})),
+    ]);
+    S.orders = ordRes.orders||[];
+
+    // Строим Map статусов SIM из отчёта T2
+    S.simStatusMap = {};
+    (repRes.rows||[]).forEach(r=>{
+      if(r.msisdn) S.simStatusMap[r.msisdn.replace(/\D/g,'')] = r.status;
+    });
+
     if(showAll){
-      renderOrders(S.orders);
+      populateOrderFilters();
+      applyOrderFilters();
       toast('Загружено '+S.orders.length+' заказов');
     } else {
       toast('Синхронизировано: '+S.orders.length+' заказов');
@@ -1014,14 +1065,17 @@ async function syncOrders(showAll) {
 
 async function loadOrders(){
   if(!S.orders.length) await syncOrders(false);
-  renderOrders(S.orders);
+  populateOrderFilters();
+  applyOrderFilters();
 }
 
 function renderOrders(orders){
   const tb=$('ordersTable');
-  $('ordersCount').textContent='Заказов: '+(orders.length||0);
+  if(!document.getElementById('fBlogger')) {
+    document.getElementById('ordersCount').textContent='Заказов: '+(orders.length||0);
+  }
   if(!orders.length){
-    tb.innerHTML='<tr><td colspan="8"><div style="text-align:center;padding:24px;color:var(--g2)">Нет заказов — нажмите «Обновить»</div></td></tr>';
+    tb.innerHTML='<tr><td colspan="8"><div style="text-align:center;padding:24px;color:var(--g2)">Нет заказов по выбранным фильтрам</div></td></tr>';
     return;
   }
   tb.innerHTML='';
@@ -1076,9 +1130,82 @@ function renderOrders(orders){
   });
 }
 
+// Заполняем фильтр блогеров
+function populateOrderFilters() {
+  const sel = document.getElementById('fBlogger');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Все блогеры</option>';
+  const refs = [...new Set(S.orders.map(o=>o.blogger).filter(Boolean))].sort();
+  refs.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
+
+// Применяем все фильтры
+function applyOrderFilters() {
+  const blogger  = document.getElementById('fBlogger')?.value  || '';
+  const status   = document.getElementById('fStatus')?.value   || '';
+  const plan     = document.getElementById('fPlan')?.value     || '';
+  const dateFrom = document.getElementById('fDateFrom')?.value || '';
+  const search   = document.getElementById('fSearch')?.value.toLowerCase().trim() || '';
+
+  let filtered = S.orders.map(o => {
+    // Определяем статус SIM
+    const hasSim = o.simNumber && o.simNumber.trim();
+    let displayStatus = 'Ожидает';
+    if(hasSim) {
+      const simClean = o.simNumber.replace(/\D/g,'');
+      const simSt = S.simStatusMap?.[simClean];
+      if(simSt) displayStatus = simSt === 'Активна' ? 'Активирован' : simSt;
+      else displayStatus = 'Отправлен';
+    }
+    return {...o, displayStatus};
+  });
+
+  if(blogger)  filtered = filtered.filter(o=>o.blogger===blogger);
+  if(status)   filtered = filtered.filter(o=>o.displayStatus===status);
+  if(plan)     filtered = filtered.filter(o=>o.plan&&o.plan.includes(plan));
+  if(dateFrom) filtered = filtered.filter(o=>{
+    if(!o.timestamp) return false;
+    const parts = o.timestamp.split(' ')[0].split('.');
+    if(parts.length<3) return true;
+    const orderDate = parts[2]+'-'+parts[1]+'-'+parts[0];
+    return orderDate >= dateFrom;
+  });
+  if(search) filtered = filtered.filter(o=>
+    JSON.stringify(o).toLowerCase().includes(search)
+  );
+
+  // Показываем активные фильтры
+  const bar = document.getElementById('activeFiltersBar');
+  const tags = [];
+  if(blogger)  tags.push('Блогер: '+blogger);
+  if(status)   tags.push('Статус: '+status);
+  if(plan)     tags.push('Тариф: '+plan);
+  if(dateFrom) tags.push('От: '+dateFrom);
+  if(search)   tags.push('Поиск: '+search);
+  if(bar) {
+    bar.style.display = tags.length ? 'flex' : 'none';
+    bar.innerHTML = tags.map(t=>'<span style="background:rgba(255,52,149,.12);color:var(--mag);border-radius:100px;padding:2px 10px;font-size:.7rem;font-weight:600">'+t+'</span>').join('');
+  }
+
+  document.getElementById('ordersCount').textContent = 'Заказов: '+filtered.length;
+  renderOrders(filtered);
+}
+
+function resetOrderFilters() {
+  ['fBlogger','fStatus','fPlan'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+  ['fDateFrom','fSearch'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+  applyOrderFilters();
+}
+
 function filterOrders(q){
-  const f=S.orders.filter(o=>JSON.stringify(o).toLowerCase().includes(q.toLowerCase()));
-  renderOrders(f);
+  applyOrderFilters();
 }
 
 // ═══════════════════════════════════════════════
